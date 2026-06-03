@@ -1,0 +1,210 @@
+:root {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-sidebar: #0f1628;
+  --bg-input: #1e2a45;
+  --bg-message-user: #2a3f5f;
+  --bg-message-assistant: #1e2a45;
+  --bg-hover: #2a3a5a;
+  --bg-active: #3a4a6a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0b0;
+  --text-muted: #6a6a80;
+  --border-color: #2a2a4a;
+  --accent: #4a9eff;
+  --accent-hover: #6ab0ff;
+  --danger: #ff4a6a;
+  --success: #4aff8a;
+  --scrollbar-bg: #1a1a2e;
+  --scrollbar-thumb: #3a3a5a;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f7fa;
+  --bg-sidebar: #f0f2f5;
+  --bg-input: #ffffff;
+  --bg-message-user: #e3f2fd;
+  --bg-message-assistant: #f5f5f5;
+  --bg-hover: #e8ecf1;
+  --bg-active: #d0d8e8;
+  --text-primary: #1a1a2e;
+  --text-secondary: #555566;
+  --text-muted: #999;
+  --border-color: #e0e0e8;
+  --accent: #1976d2;
+  --accent-hover: #1565c0;
+  --danger: #d32f2f;
+  --success: #2e7d32;
+  --scrollbar-bg: #f0f0f0;
+  --scrollbar-thumb: #c0c0c0;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-size: inherit;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+input, textarea, select {
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+}
+
+select {
+  cursor: pointer;
+}
+
+/* Markdown content styles */
+.markdown-body {
+  font-size: 14px;
+  line-height: 1.7;
+  word-wrap: break-word;
+}
+
+.markdown-body p {
+  margin-bottom: 8px;
+}
+
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body code {
+  background: var(--bg-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+}
+
+.markdown-body pre {
+  margin: 8px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.markdown-body pre code {
+  display: block;
+  padding: 12px 16px;
+  background: var(--bg-sidebar);
+  overflow-x: auto;
+}
+
+.markdown-body ul, .markdown-body ol {
+  padding-left: 20px;
+  margin-bottom: 8px;
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  margin: 8px 0;
+  color: var(--text-secondary);
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.markdown-body th, .markdown-body td {
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  text-align: left;
+}
+
+.markdown-body th {
+  background: var(--bg-hover);
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
+  margin: 12px 0 8px;
+  font-weight: 600;
+}
+
+/* Code block header */
+.code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.copy-btn {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background: var(--accent);
+  color: white;
+}
