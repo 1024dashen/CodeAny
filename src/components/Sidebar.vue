@@ -44,6 +44,10 @@
               <span class="dropdown-icon">⚙</span>
               <span>系统设置</span>
             </button>
+            <button class="dropdown-item" @click="toggleTheme">
+              <span class="dropdown-icon">{{ isDark ? '☀' : '🌙' }}</span>
+              <span>{{ isDark ? '浅色模式' : '深色模式' }}</span>
+            </button>
             <button class="dropdown-item" @click="openHelp">
               <span class="dropdown-icon">📖</span>
               <span>帮助文档</span>
@@ -65,15 +69,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useChatStore } from '@/stores/chat';
 import { useAuthStore } from '@/stores/auth';
+import { useSettingsStore } from '@/stores/settings';
 import { useRouter } from 'vue-router';
 
 const chatStore = useChatStore();
 const authStore = useAuthStore();
+const settingsStore = useSettingsStore();
 const router = useRouter();
 const showUserMenu = ref(false);
+
+const isDark = computed(() => settingsStore.settings.theme === 'dark');
+
+function toggleTheme() {
+  closeUserMenu();
+  settingsStore.setTheme(isDark.value ? 'light' : 'dark');
+}
 
 function toggleUserMenu() {
   showUserMenu.value = !showUserMenu.value;

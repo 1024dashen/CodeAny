@@ -6,6 +6,13 @@
         <ModelSelector />
         <div class="header-actions">
           <button
+            class="theme-btn"
+            @click="settingsStore.setTheme(isDark ? 'light' : 'dark')"
+            :title="isDark ? '切换到浅色模式' : '切换到深色模式'"
+          >
+            {{ isDark ? '☀' : '🌙' }}
+          </button>
+          <button
             v-if="chatStore.activeSession"
             class="clear-btn"
             @click="chatStore.clearMessages(chatStore.activeSessionId)"
@@ -40,15 +47,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { useChatStore } from '@/stores/chat';
+import { useSettingsStore } from '@/stores/settings';
 import Sidebar from '@/components/Sidebar.vue';
 import ModelSelector from '@/components/ModelSelector.vue';
 import MessageBubble from '@/components/MessageBubble.vue';
 import ChatInput from '@/components/ChatInput.vue';
 
 const chatStore = useChatStore();
+const settingsStore = useSettingsStore();
 const messagesRef = ref<HTMLDivElement | null>(null);
+
+const isDark = computed(() => settingsStore.settings.theme === 'dark');
 
 const tips = [
   '帮我写一段 Python 快速排序',
@@ -122,6 +133,19 @@ watch(
 .clear-btn:hover {
   background: var(--bg-hover);
   color: var(--danger);
+}
+
+.theme-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 16px;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.theme-btn:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
 }
 
 .chat-messages {
