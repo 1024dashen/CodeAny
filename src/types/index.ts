@@ -42,6 +42,31 @@ export interface AppSettings {
   systemPrompt: string;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  nickname: string;
+  avatar?: string;
+  createdAt: number;
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface LoginParams {
+  email: string;
+  password: string;
+}
+
+export interface RegisterParams {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  nickname?: string;
+}
+
 export interface StreamChunk {
   choices?: Array<{
     delta?: {

@@ -26,18 +26,96 @@
     </div>
 
     <div class="sidebar-footer">
-      <button class="settings-btn" @click="$router.push('/settings')">
-        <span class="icon">⚙</span>
-        <span>设置</span>
-      </button>
+      <div class="user-menu-wrapper" @click.stop>
+        <button class="user-trigger" :class="{ active: showUserMenu }" @click="toggleUserMenu">
+          <div class="user-trigger-left">
+            <div class="user-avatar">{{ authStore.userNickname.charAt(0).toUpperCase() }}</div>
+            <div class="user-detail">
+              <span class="user-name">{{ authStore.userNickname }}</span>
+              <span class="user-email">{{ authStore.userEmail }}</span>
+            </div>
+          </div>
+          <span class="user-chevron" :class="{ open: showUserMenu }">›</span>
+        </button>
+
+        <Transition name="menu">
+          <div v-if="showUserMenu" class="user-dropdown">
+            <button class="dropdown-item" @click="goSettings">
+              <span class="dropdown-icon">⚙</span>
+              <span>系统设置</span>
+            </button>
+            <button class="dropdown-item" @click="openHelp">
+              <span class="dropdown-icon">📖</span>
+              <span>帮助文档</span>
+            </button>
+            <button class="dropdown-item" @click="openAbout">
+              <span class="dropdown-icon">ℹ️</span>
+              <span>关于我们</span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" @click="handleLogout">
+              <span class="dropdown-icon">⏻</span>
+              <span>退出登录</span>
+            </button>
+          </div>
+        </Transition>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useChatStore } from '@/stores/chat';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
 const chatStore = useChatStore();
+const authStore = useAuthStore();
+const router = useRouter();
+const showUserMenu = ref(false);
+
+function toggleUserMenu() {
+  showUserMenu.value = !showUserMenu.value;
+}
+
+function closeUserMenu() {
+  showUserMenu.value = false;
+}
+
+function goSettings() {
+  closeUserMenu();
+  router.push('/settings');
+}
+
+function openHelp() {
+  closeUserMenu();
+  window.open('https://github.com/codeany/docs', '_blank');
+}
+
+function openAbout() {
+  closeUserMenu();
+  alert('CodeAny v0.1.0\nAI 智能对话助手，支持多种大语言模型');
+}
+
+async function handleLogout() {
+  closeUserMenu();
+  await authStore.logout();
+  router.push('/login');
+}
+
+// 点击外部关闭菜单
+function handleClickOutside() {
+  closeUserMenu();
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <style scoped>
@@ -150,20 +228,146 @@ const chatStore = useChatStore();
   border-top: 1px solid var(--border-color);
 }
 
-.settings-btn {
-  width: 100%;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-secondary);
-  transition: all 0.2s;
+.user-menu-wrapper {
+  position: relative;
 }
 
-.settings-btn:hover {
+.user-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.user-trigger:hover {
   background: var(--bg-hover);
+}
+
+.user-trigger.active {
+  background: var(--bg-active);
+}
+
+.user-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.user-detail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.user-email {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.user-chevron {
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.user-chevron.open {
+  transform: rotate(90deg);
+}
+
+.user-dropdown {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 12px;
+  right: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: var(--shadow);
+  z-index: 100;
+}
+
+.dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-size: 13px;
   color: var(--text-primary);
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-hover);
+}
+
+.dropdown-item.danger {
+  color: var(--danger);
+}
+
+.dropdown-item.danger:hover {
+  background: rgba(255, 74, 106, 0.1);
+}
+
+.dropdown-icon {
+  width: 18px;
+  text-align: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 4px 8px;
+}
+
+/* 下拉菜单动画 */
+.menu-enter-active,
+.menu-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.menu-enter-from,
+.menu-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
 }
 </style>
