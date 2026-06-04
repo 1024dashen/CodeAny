@@ -184,10 +184,7 @@ function addCustomProvider() {
 .settings-body {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
+  padding: 24px 32px;
 }
 
 .settings-section {
