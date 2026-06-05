@@ -12,10 +12,13 @@ const LANG_TO_PATH: Record<string, string> = {
   js: 'app.js',
 };
 
-const REQUIRED_PATHS = ['index.html', 'styles.css', 'app.js'] as const;
-
 function normalizePath(raw: string): string {
   return raw.trim().replace(/^\/+/, '').replace(/\\/g, '/');
+}
+
+function isHtmlPath(path: string): boolean {
+  const lower = path.toLowerCase();
+  return lower.endsWith('.html') || lower.endsWith('.htm');
 }
 
 function addFile(
@@ -59,20 +62,15 @@ export function validateProjectFiles(files: ProjectFile[]): string | null {
     return '未能从 AI 回复中解析出任何文件，请重试';
   }
 
-  const paths = new Set(files.map(f => normalizePath(f.path)));
-
-  if (!paths.has('index.html')) {
-    return '生成的文件中缺少 index.html，请重试';
+  const htmlFiles = files.filter(f => isHtmlPath(normalizePath(f.path)));
+  if (htmlFiles.length === 0) {
+    return '生成的文件中缺少 HTML 页面，请重试';
   }
 
-  const missing = REQUIRED_PATHS.filter(p => !paths.has(p));
-  if (missing.length > 0) {
-    return `缺少独立文件：${missing.join('、')}。请重新生成，并将 CSS/JS 拆分到 styles.css 和 app.js，不要内联在 HTML 中。`;
-  }
-
-  const indexFile = files.find(f => normalizePath(f.path) === 'index.html');
-  if (indexFile && hasInlineAssets(indexFile.content)) {
-    return 'index.html 中检测到内联 <style> 或 <script>，请把样式和脚本分别放到 styles.css 和 app.js 后重试';
+  for (const htmlFile of htmlFiles) {
+    if (hasInlineAssets(htmlFile.content)) {
+      return `${htmlFile.path} 中检测到内联 <style> 或 <script>，请将样式和脚本拆分到独立文件后重试`;
+    }
   }
 
   return null;

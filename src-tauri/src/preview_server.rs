@@ -41,10 +41,33 @@ fn mime_type(path: &Path) -> &'static str {
     }
 }
 
+fn find_entry_html(root: &Path) -> Option<PathBuf> {
+    let index = root.join("index.html");
+    if index.is_file() {
+        return Some(index);
+    }
+
+    let entries = fs::read_dir(root).ok()?;
+    let mut html_files: Vec<PathBuf> = entries
+        .filter_map(|e| e.ok())
+        .map(|e| e.path())
+        .filter(|p| {
+            p.is_file()
+                && p.extension()
+                    .and_then(|ext| ext.to_str())
+                    .map(|ext| ext.eq_ignore_ascii_case("html") || ext.eq_ignore_ascii_case("htm"))
+                    .unwrap_or(false)
+        })
+        .collect();
+
+    html_files.sort();
+    html_files.into_iter().next()
+}
+
 fn resolve_file_path(root: &Path, url_path: &str) -> Option<PathBuf> {
     let trimmed = url_path.trim_start_matches('/');
     let candidate = if trimmed.is_empty() {
-        root.join("index.html")
+        find_entry_html(root)?
     } else {
         root.join(trimmed)
     };
@@ -58,9 +81,14 @@ fn resolve_file_path(root: &Path, url_path: &str) -> Option<PathBuf> {
     }
 
     let index = if trimmed.is_empty() {
-        root.join("index.html")
+        find_entry_html(root)?
     } else {
-        root.join(trimmed).join("index.html")
+        let nested = root.join(trimmed).join("index.html");
+        if nested.is_file() {
+            nested
+        } else {
+            return None;
+        }
     };
     if index.is_file() {
         let canonical_index = index.canonicalize().ok()?;
@@ -156,9 +184,8 @@ pub fn start_preview_server(
     project_dir: String,
 ) -> Result<u16, String> {
     let root = PathBuf::from(&project_dir);
-    let index = root.join("index.html");
-    if !index.is_file() {
-        return Err("项目目录中不存在 index.html".into());
+    if find_entry_html(&root).is_none() {
+        return Err("项目目录中不存在可预览的 HTML 页面".into());
     }
 
     let canonical_root = root

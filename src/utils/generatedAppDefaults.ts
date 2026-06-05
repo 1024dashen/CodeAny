@@ -63,7 +63,7 @@ export function applyGeneratedAppDefaults(
 
   return files.map(file => {
     const path = file.path.replace(/^\/+/, '');
-    if (path !== 'styles.css') {
+    if (!path.endsWith('.css')) {
       return file;
     }
 

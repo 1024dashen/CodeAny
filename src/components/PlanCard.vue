@@ -5,7 +5,7 @@
       <span class="plan-title">开发计划已就绪</span>
     </div>
     <p class="plan-hint">
-      确认后将开始生成 HTML/CSS/JS 文件并保存到本地工作区。也可在下方输入修改意见，让 AI 重新修订计划。
+      确认后将按计划生成项目文件并保存到本地工作区。也可在下方输入修改意见，让 AI 重新修订计划。
     </p>
     <button
       class="confirm-btn"
