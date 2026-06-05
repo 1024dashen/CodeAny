@@ -1,9 +1,9 @@
 <template>
   <div class="sidebar" :class="{ collapsed }">
     <div class="sidebar-header">
-      <button class="new-chat-btn" @click="chatStore.createSession()" :title="collapsed ? '新对话' : ''">
+      <button class="new-chat-btn" @click="handleNewSession" :title="collapsed ? '新应用' : ''">
         <span class="icon">+</span>
-        <span v-if="!collapsed" class="btn-text">新对话</span>
+        <span v-if="!collapsed" class="btn-text">新应用</span>
       </button>
     </div>
 
@@ -84,6 +84,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useChatStore } from '@/stores/chat';
 import { useAuthStore } from '@/stores/auth';
 import { useSettingsStore } from '@/stores/settings';
+import { useWorkspaceStore } from '@/stores/workspace';
 import { useRouter } from 'vue-router';
 
 defineProps<{
@@ -93,6 +94,7 @@ defineProps<{
 const chatStore = useChatStore();
 const authStore = useAuthStore();
 const settingsStore = useSettingsStore();
+const workspaceStore = useWorkspaceStore();
 const router = useRouter();
 const showUserMenu = ref(false);
 
@@ -105,6 +107,11 @@ function toggleTheme() {
 
 function toggleUserMenu() {
   showUserMenu.value = !showUserMenu.value;
+}
+
+async function handleNewSession() {
+  await workspaceStore.ensureWorkspaceRoot();
+  await chatStore.createSession();
 }
 
 function closeUserMenu() {

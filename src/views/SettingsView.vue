@@ -18,6 +18,34 @@
         </div>
       </section>
 
+      <!-- Workspace -->
+      <section class="settings-section">
+        <h3>工作区</h3>
+        <div class="setting-row">
+          <label>根目录</label>
+          <input
+            type="text"
+            :value="workspaceStore.workspaceRoot"
+            readonly
+            placeholder="尚未选择工作区目录"
+          />
+        </div>
+        <button class="add-btn" @click="workspaceStore.pickWorkspaceRoot()">更改目录</button>
+        <p class="section-hint">每个对话的应用文件将保存在该目录下的独立子文件夹中</p>
+      </section>
+
+      <!-- Generation Prompt -->
+      <section class="settings-section">
+        <h3>HTML 生成提示词</h3>
+        <textarea
+          class="system-prompt-input"
+          :value="settingsStore.settings.generationPrompt"
+          @input="settingsStore.setGenerationPrompt(($event.target as HTMLTextAreaElement).value)"
+          placeholder="设置 HTML 文件生成时的额外要求（可选）"
+          rows="3"
+        />
+      </section>
+
       <!-- System Prompt -->
       <section class="settings-section">
         <h3>系统提示词</h3>
@@ -123,8 +151,10 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { useSettingsStore } from '@/stores/settings';
+import { useWorkspaceStore } from '@/stores/workspace';
 
 const settingsStore = useSettingsStore();
+const workspaceStore = useWorkspaceStore();
 const showKeys = ref<Record<string, boolean>>({});
 const newModelIds = reactive<Record<string, string>>({});
 
@@ -422,5 +452,11 @@ function addCustomProvider() {
 
 .add-btn:hover {
   background: var(--accent-hover);
+}
+
+.section-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 </style>

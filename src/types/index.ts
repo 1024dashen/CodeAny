@@ -30,6 +30,23 @@ export interface ChatSession {
   providerId: string;
   createdAt: number;
   updatedAt: number;
+  generationPhase: GenerationPhase;
+  planContent?: string;
+  projectFiles?: ProjectFile[];
+  projectDir?: string;
+}
+
+export type GenerationPhase =
+  | 'idle'
+  | 'planning'
+  | 'plan_ready'
+  | 'generating'
+  | 'done'
+  | 'error';
+
+export interface ProjectFile {
+  path: string;
+  content: string;
 }
 
 export interface AppSettings {
@@ -40,6 +57,7 @@ export interface AppSettings {
   fontSize: number;
   sendOnEnter: boolean;
   systemPrompt: string;
+  generationPrompt: string;
 }
 
 export interface User {

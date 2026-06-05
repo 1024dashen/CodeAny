@@ -25,6 +25,15 @@
             {{ copied ? '✓' : '📋' }}
           </button>
         </div>
+        <PlanCard
+          v-if="showPlanCard"
+          :disabled="isGenerating"
+          @confirm="$emit('confirm-plan')"
+        />
+        <ProjectFiles
+          v-if="showProjectFiles && projectFiles?.length"
+          :files="projectFiles"
+        />
       </div>
     </template>
 
@@ -56,11 +65,21 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import type { ChatMessage } from '@/types';
+import type { ChatMessage, ProjectFile } from '@/types';
 import { renderMarkdown } from '@/utils/markdown';
+import PlanCard from '@/components/PlanCard.vue';
+import ProjectFiles from '@/components/ProjectFiles.vue';
 
 const props = defineProps<{
   message: ChatMessage;
+  showPlanCard?: boolean;
+  showProjectFiles?: boolean;
+  projectFiles?: ProjectFile[];
+  isGenerating?: boolean;
+}>();
+
+defineEmits<{
+  'confirm-plan': [];
 }>();
 
 const copied = ref(false);

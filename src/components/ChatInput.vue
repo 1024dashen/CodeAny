@@ -21,7 +21,7 @@
         <button
           v-else
           class="send-btn"
-          :disabled="!inputText.trim()"
+          :disabled="!inputText.trim() || !chatStore.canSendMessage"
           @click="handleSend"
           title="发送"
         >
@@ -35,8 +35,10 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue';
 import { useChatStore } from '@/stores/chat';
+import { useWorkspaceStore } from '@/stores/workspace';
 
 const chatStore = useChatStore();
+const workspaceStore = useWorkspaceStore();
 const inputText = ref('');
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
 
@@ -57,7 +59,7 @@ function handleKeydown(e: KeyboardEvent) {
 
 async function handleSend() {
   const text = inputText.value.trim();
-  if (!text || chatStore.isStreaming) return;
+  if (!text || !chatStore.canSendMessage) return;
 
   inputText.value = '';
   await nextTick();
@@ -65,6 +67,7 @@ async function handleSend() {
     textareaRef.value.style.height = 'auto';
   }
 
+  await workspaceStore.ensureWorkspaceRoot();
   await chatStore.sendMessage(text);
 }
 </script>

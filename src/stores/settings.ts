@@ -2,37 +2,31 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { AppSettings, ModelProvider } from '@/types';
 import { DEFAULT_PROVIDERS } from '@/utils/providers';
+import { loadStorageValue, saveStorageValue } from '@/utils/store';
 
-const STORAGE_KEY = 'codeany-settings';
+const STORAGE_KEY = 'settings';
 
-function loadSettings(): AppSettings {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const saved = JSON.parse(raw) as AppSettings;
-      // Merge saved with defaults to pick up new providers
-      const mergedProviders = DEFAULT_PROVIDERS.map(dp => {
-        const savedP = saved.providers.find(sp => sp.id === dp.id);
-        if (savedP) {
-          // Keep default models + any user-added models from saved
-          const defaultModelIds = new Set(dp.models.map(m => m.id));
-          const userModels = savedP.models.filter(m => !defaultModelIds.has(m.id));
-          return { ...dp, apiKey: savedP.apiKey, models: [...dp.models, ...userModels] };
-        }
-        return dp;
-      });
-      // Also keep any custom providers that were added
-      const customProviders = saved.providers.filter(
-        sp => !DEFAULT_PROVIDERS.some(dp => dp.id === sp.id)
-      );
-      return {
-        ...saved,
-        providers: [...mergedProviders, ...customProviders],
-      };
+function mergeSettings(saved: AppSettings): AppSettings {
+  const mergedProviders = DEFAULT_PROVIDERS.map(dp => {
+    const savedP = saved.providers.find(sp => sp.id === dp.id);
+    if (savedP) {
+      const defaultModelIds = new Set(dp.models.map(m => m.id));
+      const userModels = savedP.models.filter(m => !defaultModelIds.has(m.id));
+      return { ...dp, apiKey: savedP.apiKey, models: [...dp.models, ...userModels] };
     }
-  } catch {
-    // ignore
-  }
+    return dp;
+  });
+  const customProviders = saved.providers.filter(
+    sp => !DEFAULT_PROVIDERS.some(dp => dp.id === sp.id),
+  );
+  return {
+    ...saved,
+    generationPrompt: saved.generationPrompt ?? '',
+    providers: [...mergedProviders, ...customProviders],
+  };
+}
+
+function defaultSettings(): AppSettings {
   return {
     providers: DEFAULT_PROVIDERS,
     activeProviderId: 'openai',
@@ -41,24 +35,33 @@ function loadSettings(): AppSettings {
     fontSize: 14,
     sendOnEnter: true,
     systemPrompt: '',
+    generationPrompt: '',
   };
 }
 
 export const useSettingsStore = defineStore('settings', () => {
-  const settings = ref<AppSettings>(loadSettings());
+  const settings = ref<AppSettings>(defaultSettings());
+  const isHydrated = ref(false);
 
   const activeProvider = computed(() =>
-    settings.value.providers.find(p => p.id === settings.value.activeProviderId)
+    settings.value.providers.find(p => p.id === settings.value.activeProviderId),
   );
 
   const activeModel = computed(() =>
-    activeProvider.value?.models.find(m => m.id === settings.value.activeModelId)
+    activeProvider.value?.models.find(m => m.id === settings.value.activeModelId),
   );
 
   const allProviders = computed(() => settings.value.providers);
 
+  async function hydrate() {
+    const saved = await loadStorageValue<AppSettings | null>(STORAGE_KEY, null);
+    settings.value = saved ? mergeSettings(saved) : defaultSettings();
+    document.documentElement.setAttribute('data-theme', settings.value.theme);
+    isHydrated.value = true;
+  }
+
   function save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings.value));
+    saveStorageValue(STORAGE_KEY, settings.value);
   }
 
   function setActiveProvider(providerId: string) {
@@ -109,7 +112,6 @@ export const useSettingsStore = defineStore('settings', () => {
   function addModel(providerId: string, modelId: string, modelName?: string) {
     const provider = settings.value.providers.find(p => p.id === providerId);
     if (!provider) return;
-    // Avoid duplicate
     if (provider.models.some(m => m.id === modelId)) return;
     provider.models.push({
       id: modelId,
@@ -140,14 +142,18 @@ export const useSettingsStore = defineStore('settings', () => {
     save();
   }
 
-  // Init theme
-  document.documentElement.setAttribute('data-theme', settings.value.theme);
+  function setGenerationPrompt(prompt: string) {
+    settings.value.generationPrompt = prompt;
+    save();
+  }
 
   return {
     settings,
+    isHydrated,
     activeProvider,
     activeModel,
     allProviders,
+    hydrate,
     setActiveProvider,
     setActiveModel,
     updateApiKey,
@@ -158,6 +164,7 @@ export const useSettingsStore = defineStore('settings', () => {
     removeModel,
     setTheme,
     setSystemPrompt,
+    setGenerationPrompt,
     save,
   };
 });

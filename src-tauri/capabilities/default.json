@@ -4,7 +4,12 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:webview:allow-create-webview-window",
+    "core:window:allow-create",
     "shell:allow-open",
+    "dialog:default",
+    "store:default",
+    "fs:default",
     {
       "identifier": "http:default",
       "allow": [
