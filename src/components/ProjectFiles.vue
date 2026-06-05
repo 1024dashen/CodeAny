@@ -89,11 +89,14 @@ const selectedFile = computed(() =>
   overflow: auto;
   padding: 10px 12px;
   border-radius: 8px;
-  background: var(--bg-primary);
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  color: var(--code-text);
   font-size: 12px;
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-all;
-  color: var(--text-secondary);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--code-scrollbar-thumb) 85%, transparent) transparent;
 }
 </style>

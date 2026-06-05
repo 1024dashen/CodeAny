@@ -209,7 +209,7 @@ async function copyMessage() {
   word-break: break-word;
   min-width: 0;
   max-width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
   overflow-y: hidden;
 }
 
@@ -221,6 +221,28 @@ async function copyMessage() {
 .message-bubble :deep(.markdown-body pre) {
   max-width: 100%;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--code-scrollbar-thumb) 85%, transparent) transparent;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+}
+
+.message-bubble :deep(.markdown-body pre::-webkit-scrollbar) {
+  height: 4px;
+}
+
+.message-bubble :deep(.markdown-body pre::-webkit-scrollbar-track) {
+  background: transparent;
+  margin: 0 2px 2px;
+}
+
+.message-bubble :deep(.markdown-body pre::-webkit-scrollbar-thumb) {
+  background: color-mix(in srgb, var(--code-scrollbar-thumb) 85%, transparent);
+  border-radius: 999px;
+}
+
+.message-bubble :deep(.markdown-body pre::-webkit-scrollbar-thumb:hover) {
+  background: var(--accent);
 }
 
 .message-bubble :deep(.markdown-body pre code) {
@@ -233,6 +255,12 @@ async function copyMessage() {
   display: block;
   max-width: 100%;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--scrollbar-thumb) 70%, transparent) transparent;
+}
+
+.message-bubble :deep(.markdown-body table::-webkit-scrollbar) {
+  height: 4px;
 }
 
 .message-bubble.is-user {
