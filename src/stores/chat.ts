@@ -19,11 +19,17 @@ function loadSessions(): ChatSession[] {
   }
 }
 
+function loadActiveSessionId(saved: ChatSession[]): string {
+  if (saved.length === 0) return '';
+  return [...saved].sort((a, b) => b.updatedAt - a.updatedAt)[0].id;
+}
+
 export const useChatStore = defineStore('chat', () => {
   const sessions = ref<ChatSession[]>(loadSessions());
-  const activeSessionId = ref<string>('');
+  const activeSessionId = ref<string>(loadActiveSessionId(loadSessions()));
   const isStreaming = ref(false);
   let abortController: AbortController | null = null;
+  let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
   const activeSession = computed(() =>
     sessions.value.find(s => s.id === activeSessionId.value)
@@ -35,6 +41,43 @@ export const useChatStore = defineStore('chat', () => {
 
   function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions.value));
+  }
+
+  function saveDebounced() {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      save();
+      saveTimer = null;
+    }, 300);
+  }
+
+  function flushSave() {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
+    save();
+  }
+
+  function updateAssistantMessage(
+    sessionId: string,
+    messageId: string,
+    patch: Partial<ChatMessage>,
+  ) {
+    const session = sessions.value.find(s => s.id === sessionId);
+    if (!session) return;
+    const index = session.messages.findIndex(m => m.id === messageId);
+    if (index < 0) return;
+    session.messages[index] = { ...session.messages[index], ...patch };
+  }
+
+  function appendAssistantContent(sessionId: string, messageId: string, chunk: string) {
+    const session = sessions.value.find(s => s.id === sessionId);
+    if (!session) return;
+    const index = session.messages.findIndex(m => m.id === messageId);
+    if (index < 0) return;
+    const msg = session.messages[index];
+    session.messages[index] = { ...msg, content: msg.content + chunk };
   }
 
   function createSession(): string {
@@ -68,7 +111,7 @@ export const useChatStore = defineStore('chat', () => {
 
   async function sendMessage(content: string) {
     const settings = useSettingsStore();
-    if (!content.trim()) return;
+    if (!content.trim() || isStreaming.value) return;
 
     let sessionId = activeSessionId.value;
     if (!sessionId) {
@@ -77,6 +120,12 @@ export const useChatStore = defineStore('chat', () => {
 
     const session = sessions.value.find(s => s.id === sessionId);
     if (!session) return;
+
+    // 使用当前设置中的模型，避免会话缓存旧配置
+    session.providerId = settings.settings.activeProviderId;
+    session.modelId = settings.settings.activeModelId;
+
+    isStreaming.value = true;
 
     // Add user message
     const userMsg: ChatMessage = {
@@ -93,8 +142,9 @@ export const useChatStore = defineStore('chat', () => {
     }
 
     // Add assistant placeholder
+    const assistantMsgId = generateId();
     const assistantMsg: ChatMessage = {
-      id: generateId(),
+      id: assistantMsgId,
       role: 'assistant',
       content: '',
       timestamp: Date.now(),
@@ -103,25 +153,29 @@ export const useChatStore = defineStore('chat', () => {
     };
     session.messages.push(assistantMsg);
     session.updatedAt = Date.now();
-    save();
+    flushSave();
 
     // Find provider
     const provider = settings.settings.providers.find(p => p.id === session.providerId);
     if (!provider) {
-      assistantMsg.isLoading = false;
-      assistantMsg.error = '未找到模型提供商，请在设置中配置';
-      save();
+      updateAssistantMessage(sessionId, assistantMsgId, {
+        isLoading: false,
+        error: '未找到模型提供商，请在设置中配置',
+      });
+      isStreaming.value = false;
+      flushSave();
       return;
     }
     if (!provider.apiKey) {
-      assistantMsg.isLoading = false;
-      assistantMsg.error = `请先在设置中配置 ${provider.name} 的 API Key`;
-      save();
+      updateAssistantMessage(sessionId, assistantMsgId, {
+        isLoading: false,
+        error: `请先在设置中配置 ${provider.name} 的 API Key`,
+      });
+      isStreaming.value = false;
+      flushSave();
       return;
     }
 
-    // Stream response
-    isStreaming.value = true;
     abortController = new AbortController();
 
     try {
@@ -134,23 +188,41 @@ export const useChatStore = defineStore('chat', () => {
       );
 
       for await (const chunk of stream) {
-        assistantMsg.content += chunk;
-        save();
+        appendAssistantContent(sessionId, assistantMsgId, chunk);
+        saveDebounced();
       }
 
-      assistantMsg.isLoading = false;
+      const finalMsg = sessions.value
+        .find(s => s.id === sessionId)
+        ?.messages.find(m => m.id === assistantMsgId);
+
+      if (finalMsg && !finalMsg.content && !finalMsg.error) {
+        updateAssistantMessage(sessionId, assistantMsgId, {
+          isLoading: false,
+          error: '模型未返回任何内容，请检查 API Key、模型名称和网络连接',
+        });
+      } else {
+        updateAssistantMessage(sessionId, assistantMsgId, { isLoading: false });
+      }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
-        assistantMsg.content += '\n\n[已停止生成]';
+        updateAssistantMessage(sessionId, assistantMsgId, {
+          isLoading: false,
+          content: (sessions.value
+            .find(s => s.id === sessionId)
+            ?.messages.find(m => m.id === assistantMsgId)?.content || '') + '\n\n[已停止生成]',
+        });
       } else {
-        assistantMsg.error = err instanceof Error ? err.message : '未知错误';
+        updateAssistantMessage(sessionId, assistantMsgId, {
+          isLoading: false,
+          error: err instanceof Error ? err.message : '未知错误',
+        });
       }
-      assistantMsg.isLoading = false;
     } finally {
       isStreaming.value = false;
       abortController = null;
       session.updatedAt = Date.now();
-      save();
+      flushSave();
     }
   }
 

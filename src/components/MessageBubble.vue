@@ -34,7 +34,11 @@ const props = defineProps<{
 
 const renderedContent = computed(() => {
   if (!props.message.content) return '';
-  return renderMarkdown(props.message.content);
+  try {
+    return renderMarkdown(props.message.content);
+  } catch {
+    return props.message.content;
+  }
 });
 
 function formatTime(ts: number): string {
