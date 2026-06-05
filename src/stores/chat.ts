@@ -16,6 +16,7 @@ import {
   extractPlanContent,
 } from '@/utils/codeParser';
 import { writeProjectFilesToDisk } from '@/utils/preview';
+import { applyGeneratedAppDefaults } from '@/utils/generatedAppDefaults';
 
 const STORAGE_KEY = 'sessions';
 
@@ -363,8 +364,12 @@ export const useChatStore = defineStore('chat', () => {
         session.generationPhase = 'plan_ready';
       } else if (session.projectDir) {
         try {
-          await writeProjectFilesToDisk(session.projectDir, files);
-          session.projectFiles = files as ProjectFile[];
+          const filesWithDefaults = applyGeneratedAppDefaults(
+            files as ProjectFile[],
+            getOriginalRequest(session),
+          );
+          await writeProjectFilesToDisk(session.projectDir, filesWithDefaults);
+          session.projectFiles = filesWithDefaults;
           session.generationPhase = 'done';
         } catch (err) {
           updateAssistantMessage(session.id, assistantMsgId, {
@@ -373,7 +378,11 @@ export const useChatStore = defineStore('chat', () => {
           session.generationPhase = 'error';
         }
       } else {
-        session.projectFiles = files as ProjectFile[];
+        const filesWithDefaults = applyGeneratedAppDefaults(
+          files as ProjectFile[],
+          getOriginalRequest(session),
+        );
+        session.projectFiles = filesWithDefaults;
         session.generationPhase = 'done';
         updateAssistantMessage(session.id, assistantMsgId, {
           error: '未设置工作区目录，文件仅保存在内存中',

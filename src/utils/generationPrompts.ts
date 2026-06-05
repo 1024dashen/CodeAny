@@ -42,8 +42,9 @@ export function buildGenerationSystemPrompt(customPrompt?: string): string {
    <link rel="stylesheet" href="styles.css">
    <script src="app.js"></script>
 5. styles.css 必须包含移动端、平板、桌面端的响应式布局
-6. 只输出上述 3 个代码块，不要输出任何解释性文字
-7. 不要使用 \`\`\`html / \`\`\`css / \`\`\`javascript 格式，必须使用 \`\`\`file:文件名 格式`;
+6. 不要自定义滚动条样式（除非用户在需求中明确提到滚动条）；默认滚动条由系统自动注入
+7. 只输出上述 3 个代码块，不要输出任何解释性文字
+8. 不要使用 \`\`\`html / \`\`\`css / \`\`\`javascript 格式，必须使用 \`\`\`file:文件名 格式`;
 
   if (customPrompt?.trim()) {
     return `${base}\n\n额外要求：\n${customPrompt.trim()}`;
