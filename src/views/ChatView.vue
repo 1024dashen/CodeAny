@@ -74,8 +74,14 @@
         />
       </div>
 
-      <div v-if="!chatStore.canSendMessage && chatStore.activeSession?.generationPhase === 'plan_ready'" class="input-hint">
-        请先确认上方的开发计划，或等待生成完成
+      <div v-if="chatStore.isPlanRevisionMode" class="input-hint">
+        对计划不满意？在下方描述修改或补充内容，AI 将修订计划；满意后点击「确认并生成」
+      </div>
+      <div
+        v-else-if="!chatStore.canSendMessage && chatStore.activeSession"
+        class="input-hint"
+      >
+        请等待生成完成
       </div>
       <ChatInput />
     </div>

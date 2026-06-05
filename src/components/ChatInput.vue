@@ -4,7 +4,7 @@
       <textarea
         ref="textareaRef"
         v-model="inputText"
-        placeholder="输入消息... (Shift+Enter 换行, Enter 发送)"
+        :placeholder="inputPlaceholder"
         rows="1"
         @input="autoResize"
         @keydown="handleKeydown"
@@ -33,11 +33,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useChatStore } from '@/stores/chat';
 import { useWorkspaceStore } from '@/stores/workspace';
 
 const chatStore = useChatStore();
+
+const inputPlaceholder = computed(() =>
+  chatStore.isPlanRevisionMode
+    ? '描述你想修改或补充的内容，例如：增加深色模式、去掉某个功能...'
+    : '输入消息... (Shift+Enter 换行, Enter 发送)',
+);
 const workspaceStore = useWorkspaceStore();
 const inputText = ref('');
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
@@ -68,7 +74,11 @@ async function handleSend() {
   }
 
   await workspaceStore.ensureWorkspaceRoot();
-  await chatStore.sendMessage(text);
+  if (chatStore.isPlanRevisionMode) {
+    await chatStore.revisePlan(text);
+  } else {
+    await chatStore.sendMessage(text);
+  }
 }
 </script>
 

@@ -7,6 +7,7 @@ import { streamChat } from '@/utils/llm';
 import { loadStorageValue, saveStorageValue } from '@/utils/store';
 import {
   PLAN_SYSTEM_PROMPT,
+  PLAN_REVISE_SYSTEM_PROMPT,
   buildGenerationSystemPrompt,
   buildGenerationUserPrompt,
 } from '@/utils/generationPrompts';
@@ -68,8 +69,12 @@ export const useChatStore = defineStore('chat', () => {
     const session = activeSession.value;
     if (!session || isStreaming.value) return false;
     const phase = session.generationPhase;
-    return phase === 'idle' || phase === 'done' || phase === 'error';
+    return phase === 'idle' || phase === 'plan_ready' || phase === 'done' || phase === 'error';
   });
+
+  const isPlanRevisionMode = computed(
+    () => activeSession.value?.generationPhase === 'plan_ready',
+  );
 
   const canPreview = computed(() => {
     const session = activeSession.value;
@@ -157,8 +162,12 @@ export const useChatStore = defineStore('chat', () => {
     activeSessionId.value = sessionId;
   }
 
-  function getOriginalRequest(session: ChatSession): string {
-    return session.messages.find(m => m.role === 'user')?.content ?? session.title;
+  function getAllUserRequirements(session: ChatSession): string {
+    const requirements = session.messages
+      .filter(m => m.role === 'user')
+      .map(m => m.content)
+      .join('\n\n');
+    return requirements || session.title;
   }
 
   async function runStream(
@@ -249,7 +258,7 @@ export const useChatStore = defineStore('chat', () => {
     }
 
     const session = sessions.value.find(s => s.id === sessionId);
-    if (!session) return;
+    if (!session || session.generationPhase === 'plan_ready') return;
 
     if (!session.projectDir) {
       const workspace = useWorkspaceStore();
@@ -313,6 +322,64 @@ export const useChatStore = defineStore('chat', () => {
     flushSave();
   }
 
+  async function revisePlan(feedback: string) {
+    const settings = useSettingsStore();
+    const session = activeSession.value;
+    if (!feedback.trim() || !session || session.generationPhase !== 'plan_ready' || isStreaming.value) {
+      return;
+    }
+
+    const sessionId = session.id;
+    session.providerId = settings.settings.activeProviderId;
+    session.modelId = settings.settings.activeModelId;
+    session.generationPhase = 'planning';
+    isStreaming.value = true;
+
+    const userMsg: ChatMessage = {
+      id: generateId(),
+      role: 'user',
+      content: feedback.trim(),
+      timestamp: Date.now(),
+    };
+    session.messages.push(userMsg);
+
+    const assistantMsgId = generateId();
+    session.messages.push({
+      id: assistantMsgId,
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now(),
+      model: settings.activeModel?.name || session.modelId,
+      isLoading: true,
+    });
+    session.updatedAt = Date.now();
+    flushSave();
+
+    const reviseSystemPrompt = [settings.settings.systemPrompt, PLAN_REVISE_SYSTEM_PROMPT]
+      .filter(Boolean)
+      .join('\n\n');
+
+    const contentResult = await runStream(
+      sessionId,
+      assistantMsgId,
+      reviseSystemPrompt,
+      session.messages.filter(m => !m.isLoading),
+    );
+
+    if (contentResult) {
+      session.planContent = extractPlanContent(contentResult);
+      session.generationPhase = 'plan_ready';
+    } else if (!session.messages.find(m => m.id === assistantMsgId)?.error) {
+      session.generationPhase = 'error';
+    } else {
+      session.generationPhase = 'error';
+    }
+
+    isStreaming.value = false;
+    session.updatedAt = Date.now();
+    flushSave();
+  }
+
   async function confirmAndGenerate() {
     const session = activeSession.value;
     if (!session || session.generationPhase !== 'plan_ready' || isStreaming.value) return;
@@ -339,7 +406,7 @@ export const useChatStore = defineStore('chat', () => {
     );
     const userPrompt = buildGenerationUserPrompt(
       session.planContent,
-      getOriginalRequest(session),
+      getAllUserRequirements(session),
     );
 
     const generationUserMsg: ChatMessage = {
@@ -366,7 +433,7 @@ export const useChatStore = defineStore('chat', () => {
         try {
           const filesWithDefaults = applyGeneratedAppDefaults(
             files as ProjectFile[],
-            getOriginalRequest(session),
+            getAllUserRequirements(session),
           );
           await writeProjectFilesToDisk(session.projectDir, filesWithDefaults);
           session.projectFiles = filesWithDefaults;
@@ -380,7 +447,7 @@ export const useChatStore = defineStore('chat', () => {
       } else {
         const filesWithDefaults = applyGeneratedAppDefaults(
           files as ProjectFile[],
-          getOriginalRequest(session),
+          getAllUserRequirements(session),
         );
         session.projectFiles = filesWithDefaults;
         session.generationPhase = 'done';
@@ -423,12 +490,14 @@ export const useChatStore = defineStore('chat', () => {
     isStreaming,
     isHydrated,
     canSendMessage,
+    isPlanRevisionMode,
     canPreview,
     hydrate,
     createSession,
     deleteSession,
     switchSession,
     sendMessage,
+    revisePlan,
     confirmAndGenerate,
     stopStreaming,
     clearMessages,

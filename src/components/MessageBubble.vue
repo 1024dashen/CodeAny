@@ -11,29 +11,36 @@
           <span v-if="message.model" class="message-model">{{ message.model }}</span>
           <span class="message-time">{{ formatTime(message.timestamp) }}</span>
         </div>
-        <div class="message-bubble-wrap">
-          <div class="message-bubble">
-            <div v-if="message.error" class="message-error">
-              ⚠️ {{ message.error }}
+        <div class="message-content-column">
+          <div class="message-bubble-block">
+            <div class="message-bubble">
+              <div v-if="message.error" class="message-error">
+                ⚠️ {{ message.error }}
+              </div>
+              <div v-else-if="message.isLoading && !message.content" class="message-loading-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <div v-else class="markdown-body" v-html="renderedContent"></div>
             </div>
-            <div v-else-if="message.isLoading && !message.content" class="message-loading-dots">
-              <span></span><span></span><span></span>
+            <div v-if="showMessageActions" class="message-actions">
+              <button class="action-btn" :title="copied ? '已复制' : '复制'" @click="copyMessage">
+                {{ copied ? '✓' : '📋' }}
+              </button>
+              <span class="action-btn action-btn-display" title="删除">🗑</span>
+              <span class="action-btn action-btn-display" title="点赞">👍</span>
+              <span class="action-btn action-btn-display" title="收藏">⭐</span>
             </div>
-            <div v-else class="markdown-body" v-html="renderedContent"></div>
           </div>
-          <button v-if="message.content" class="copy-btn" @click="copyMessage" :title="copied ? '已复制' : '复制'">
-            {{ copied ? '✓' : '📋' }}
-          </button>
+          <PlanCard
+            v-if="showPlanCard"
+            :disabled="isGenerating"
+            @confirm="$emit('confirm-plan')"
+          />
+          <ProjectFiles
+            v-if="showProjectFiles && projectFiles?.length"
+            :files="projectFiles"
+          />
         </div>
-        <PlanCard
-          v-if="showPlanCard"
-          :disabled="isGenerating"
-          @confirm="$emit('confirm-plan')"
-        />
-        <ProjectFiles
-          v-if="showProjectFiles && projectFiles?.length"
-          :files="projectFiles"
-        />
       </div>
     </template>
 
@@ -44,15 +51,20 @@
           <span class="message-time">{{ formatTime(message.timestamp) }}</span>
           <span class="message-role">你</span>
         </div>
-        <div class="message-bubble-wrap is-right">
-          <button v-if="message.content" class="copy-btn" @click="copyMessage" :title="copied ? '已复制' : '复制'">
-            {{ copied ? '✓' : '📋' }}
-          </button>
+        <div class="message-bubble-block is-right">
           <div class="message-bubble is-user">
             <div v-if="message.error" class="message-error">
               ⚠️ {{ message.error }}
             </div>
             <div v-else class="message-text">{{ message.content }}</div>
+          </div>
+          <div v-if="showMessageActions" class="message-actions is-right">
+            <button class="action-btn" :title="copied ? '已复制' : '复制'" @click="copyMessage">
+              {{ copied ? '✓' : '📋' }}
+            </button>
+            <span class="action-btn action-btn-display" title="删除">🗑</span>
+            <span class="action-btn action-btn-display" title="点赞">👍</span>
+            <span class="action-btn action-btn-display" title="收藏">⭐</span>
           </div>
         </div>
       </div>
@@ -92,6 +104,10 @@ const renderedContent = computed(() => {
     return props.message.content;
   }
 });
+
+const showMessageActions = computed(
+  () => !!props.message.content && !props.message.isLoading && !props.message.error,
+);
 
 function formatTime(ts: number): string {
   const d = new Date(ts);
@@ -156,16 +172,40 @@ async function copyMessage() {
   min-width: 0;
 }
 
-.message-bubble-wrap {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  min-width: 0;
+.message-content-column {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
   max-width: 100%;
+  min-width: 0;
 }
 
-.message-bubble-wrap.is-right {
-  flex-direction: row-reverse;
+.message-content-column > :deep(.plan-card),
+.message-content-column > :deep(.project-files) {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.message-bubble-block {
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.message-bubble-block.is-right {
+  align-self: flex-end;
+}
+
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.message-actions.is-right {
+  justify-content: flex-end;
 }
 
 .message-header {
@@ -279,34 +319,35 @@ async function copyMessage() {
   word-break: break-word;
 }
 
-.copy-btn {
-  flex-shrink: 0;
+.action-btn {
   width: 28px;
-  height: 28px;
+  height: 24px;
   border-radius: 6px;
   font-size: 12px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
   background: transparent;
-  opacity: 0;
   transition: all 0.15s;
   cursor: pointer;
+  border: none;
+  padding: 0;
 }
 
-.message-bubble-wrap:hover .copy-btn {
-  opacity: 1;
-}
-
-.copy-btn:hover {
+.action-btn:hover {
   background: var(--bg-hover);
   color: var(--accent);
-  opacity: 1;
 }
 
-.copy-btn:active {
+.action-btn:active {
   transform: scale(0.9);
+}
+
+.action-btn-display {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.7;
 }
 
 .message-error {
