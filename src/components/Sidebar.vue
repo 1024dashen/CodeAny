@@ -41,6 +41,11 @@
 
         <Transition name="menu">
           <div v-if="showUserMenu" class="user-dropdown" :class="{ 'dropdown-collapsed': collapsed }">
+            <button class="dropdown-item" @click="goProfile">
+              <span class="dropdown-icon">👤</span>
+              <span v-if="collapsed">个人</span>
+              <span v-else>个人中心</span>
+            </button>
             <button class="dropdown-item" @click="goSettings">
               <span class="dropdown-icon">⚙</span>
               <span v-if="collapsed">设置</span>
@@ -104,6 +109,11 @@ function toggleUserMenu() {
 
 function closeUserMenu() {
   showUserMenu.value = false;
+}
+
+function goProfile() {
+  closeUserMenu();
+  router.push('/profile');
 }
 
 function goSettings() {
