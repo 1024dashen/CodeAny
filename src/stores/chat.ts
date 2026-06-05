@@ -360,7 +360,7 @@ export const useChatStore = defineStore('chat', () => {
         updateAssistantMessage(session.id, assistantMsgId, {
           error: validationError,
         });
-        session.generationPhase = 'error';
+        session.generationPhase = 'plan_ready';
       } else if (session.projectDir) {
         try {
           await writeProjectFilesToDisk(session.projectDir, files);

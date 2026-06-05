@@ -4,8 +4,10 @@ use std::fs;
 use std::io::{Read, Write};
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
+use std::time::Duration;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectFile {
@@ -14,7 +16,7 @@ pub struct ProjectFile {
 }
 
 pub(crate) struct PreviewServer {
-    shutdown: Arc<Mutex<bool>>,
+    shutdown: Arc<AtomicBool>,
     handle: Option<JoinHandle<()>>,
 }
 
@@ -68,6 +70,35 @@ fn resolve_file_path(root: &Path, url_path: &str) -> Option<PathBuf> {
     }
 
     None
+}
+
+fn handle_connection(stream: &mut std::net::TcpStream, canonical_root: &Path) {
+    let mut buffer = [0u8; 4096];
+    let n = match stream.read(&mut buffer) {
+        Ok(n) => n,
+        Err(_) => return,
+    };
+    let request = String::from_utf8_lossy(&buffer[..n]);
+    let request_line = request.lines().next().unwrap_or("");
+    let url_path = request_line.split_whitespace().nth(1).unwrap_or("/");
+
+    match resolve_file_path(canonical_root, url_path) {
+        Some(file_path) => {
+            let content = fs::read(&file_path).unwrap_or_default();
+            let content_type = mime_type(&file_path);
+            let headers = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                content_type,
+                content.len()
+            );
+            let _ = stream.write_all(headers.as_bytes());
+            let _ = stream.write_all(&content);
+        }
+        None => {
+            let body = b"HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: 9\r\nConnection: close\r\n\r\nNot Found";
+            let _ = stream.write_all(body);
+        }
+    }
 }
 
 #[tauri::command]
@@ -141,41 +172,28 @@ pub fn start_preview_server(
         .map_err(|e| format!("获取端口失败: {}", e))?
         .port();
 
-    let shutdown = Arc::new(Mutex::new(false));
+    listener
+        .set_nonblocking(true)
+        .map_err(|e| format!("设置非阻塞模式失败: {}", e))?;
+
+    let shutdown = Arc::new(AtomicBool::new(false));
     let shutdown_flag = Arc::clone(&shutdown);
+    let root_for_thread = canonical_root.clone();
 
     let handle = thread::spawn(move || {
-        for stream in listener.incoming().flatten() {
-            if *shutdown_flag.lock().unwrap() {
+        loop {
+            if shutdown_flag.load(Ordering::Relaxed) {
                 break;
             }
 
-            let mut stream = stream;
-            let mut buffer = [0u8; 4096];
-            let n = match stream.read(&mut buffer) {
-                Ok(n) => n,
-                Err(_) => continue,
-            };
-            let request = String::from_utf8_lossy(&buffer[..n]);
-            let request_line = request.lines().next().unwrap_or("");
-            let url_path = request_line.split_whitespace().nth(1).unwrap_or("/");
-
-            match resolve_file_path(&canonical_root, url_path) {
-                Some(file_path) => {
-                    let content = fs::read(&file_path).unwrap_or_default();
-                    let content_type = mime_type(&file_path);
-                    let headers = format!(
-                        "HTTP/1.1 200 OK\r\nContent-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
-                        content_type,
-                        content.len()
-                    );
-                    let _ = stream.write_all(headers.as_bytes());
-                    let _ = stream.write_all(&content);
+            match listener.accept() {
+                Ok((mut stream, _)) => {
+                    handle_connection(&mut stream, &root_for_thread);
                 }
-                None => {
-                    let body = b"HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: 9\r\nConnection: close\r\n\r\nNot Found";
-                    let _ = stream.write_all(body);
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    thread::sleep(Duration::from_millis(50));
                 }
+                Err(_) => break,
             }
         }
     });
@@ -192,12 +210,21 @@ pub fn start_preview_server(
 }
 
 #[tauri::command]
-pub fn stop_preview_server(state: tauri::State<'_, PreviewServerState>, port: u16) -> Result<(), String> {
-    let mut servers = state.0.lock().unwrap();
-    if let Some(mut server) = servers.remove(&port) {
-        *server.shutdown.lock().unwrap() = true;
-        if let Some(handle) = server.handle.take() {
-            let _ = handle.join();
+pub fn stop_preview_server(
+    state: tauri::State<'_, PreviewServerState>,
+    port: u16,
+) -> Result<(), String> {
+    let server = {
+        let mut servers = state.0.lock().unwrap();
+        servers.remove(&port)
+    };
+
+    if let Some(server) = server {
+        server.shutdown.store(true, Ordering::Relaxed);
+        if let Some(handle) = server.handle {
+            thread::spawn(move || {
+                let _ = handle.join();
+            });
         }
         Ok(())
     } else {

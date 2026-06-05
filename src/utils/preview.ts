@@ -4,6 +4,16 @@ import { isTauriEnv } from '@/utils/store';
 
 const activePreviewPorts = new Map<string, number>();
 
+function stopPreviewServer(sessionId: string): void {
+  const port = activePreviewPorts.get(sessionId);
+  if (port === undefined) return;
+
+  activePreviewPorts.delete(sessionId);
+  invoke('stop_preview_server', { port }).catch(() => {
+    // ignore stale server
+  });
+}
+
 export async function openProjectPreview(
   sessionId: string,
   sessionTitle: string,
@@ -13,20 +23,11 @@ export async function openProjectPreview(
     throw new Error('预览功能仅在 Tauri 桌面应用中可用');
   }
 
-  const existingPort = activePreviewPorts.get(sessionId);
-  if (existingPort !== undefined) {
-    try {
-      await invoke('stop_preview_server', { port: existingPort });
-    } catch {
-      // ignore stale server
-    }
-    activePreviewPorts.delete(sessionId);
-
-    const existingLabel = `preview-${sessionId}`;
-    const existingWin = await WebviewWindow.getByLabel(existingLabel);
-    if (existingWin) {
-      await existingWin.close();
-    }
+  const existingLabel = `preview-${sessionId}`;
+  const existingWin = await WebviewWindow.getByLabel(existingLabel);
+  if (existingWin) {
+    stopPreviewServer(sessionId);
+    await existingWin.close();
   }
 
   const port = await invoke<number>('start_preview_server', { projectDir });
@@ -42,16 +43,9 @@ export async function openProjectPreview(
     resizable: true,
   });
 
-  previewWin.onCloseRequested(async () => {
-    const currentPort = activePreviewPorts.get(sessionId);
-    if (currentPort !== undefined) {
-      try {
-        await invoke('stop_preview_server', { port: currentPort });
-      } catch {
-        // ignore
-      }
-      activePreviewPorts.delete(sessionId);
-    }
+  // 窗口销毁后再停止服务，避免 onCloseRequested 里 await 阻塞关闭流程
+  previewWin.once('tauri://destroyed', () => {
+    stopPreviewServer(sessionId);
   });
 }
 
