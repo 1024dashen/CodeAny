@@ -1,9 +1,9 @@
 <template>
-  <div class="sidebar">
+  <div class="sidebar" :class="{ collapsed }">
     <div class="sidebar-header">
-      <button class="new-chat-btn" @click="chatStore.createSession()">
+      <button class="new-chat-btn" @click="chatStore.createSession()" :title="collapsed ? '新对话' : ''">
         <span class="icon">+</span>
-        <span>新对话</span>
+        <span v-if="!collapsed" class="btn-text">新对话</span>
       </button>
     </div>
 
@@ -14,12 +14,13 @@
         class="session-item"
         :class="{ active: session.id === chatStore.activeSessionId }"
         @click="chatStore.switchSession(session.id)"
+        :title="collapsed ? session.title : ''"
       >
         <div class="session-info">
           <span class="session-icon">💬</span>
-          <span class="session-title">{{ session.title }}</span>
+          <span v-if="!collapsed" class="session-title">{{ session.title }}</span>
         </div>
-        <button class="session-delete" @click.stop="chatStore.deleteSession(session.id)" title="删除对话">
+        <button v-if="!collapsed" class="session-delete" @click.stop="chatStore.deleteSession(session.id)" title="删除对话">
           ✕
         </button>
       </div>
@@ -30,36 +31,41 @@
         <button class="user-trigger" :class="{ active: showUserMenu }" @click="toggleUserMenu">
           <div class="user-trigger-left">
             <div class="user-avatar">{{ authStore.userNickname.charAt(0).toUpperCase() }}</div>
-            <div class="user-detail">
+            <div v-if="!collapsed" class="user-detail">
               <span class="user-name">{{ authStore.userNickname }}</span>
               <span class="user-email">{{ authStore.userEmail }}</span>
             </div>
           </div>
-          <span class="user-chevron" :class="{ open: showUserMenu }">›</span>
+          <span v-if="!collapsed" class="user-chevron" :class="{ open: showUserMenu }">›</span>
         </button>
 
         <Transition name="menu">
-          <div v-if="showUserMenu" class="user-dropdown">
+          <div v-if="showUserMenu" class="user-dropdown" :class="{ 'dropdown-collapsed': collapsed }">
             <button class="dropdown-item" @click="goSettings">
               <span class="dropdown-icon">⚙</span>
-              <span>系统设置</span>
+              <span v-if="collapsed">设置</span>
+              <span v-else>系统设置</span>
             </button>
             <button class="dropdown-item" @click="toggleTheme">
               <span class="dropdown-icon">{{ isDark ? '☀' : '🌙' }}</span>
-              <span>{{ isDark ? '浅色模式' : '深色模式' }}</span>
+              <span v-if="collapsed">{{ isDark ? '浅色' : '深色' }}</span>
+              <span v-else>{{ isDark ? '浅色模式' : '深色模式' }}</span>
             </button>
             <button class="dropdown-item" @click="openHelp">
               <span class="dropdown-icon">📖</span>
-              <span>帮助文档</span>
+              <span v-if="collapsed">帮助</span>
+              <span v-else>帮助文档</span>
             </button>
             <button class="dropdown-item" @click="openAbout">
               <span class="dropdown-icon">ℹ️</span>
-              <span>关于我们</span>
+              <span v-if="collapsed">关于</span>
+              <span v-else>关于我们</span>
             </button>
             <div class="dropdown-divider"></div>
             <button class="dropdown-item danger" @click="handleLogout">
               <span class="dropdown-icon">⏻</span>
-              <span>退出登录</span>
+              <span v-if="collapsed">退出</span>
+              <span v-else>退出登录</span>
             </button>
           </div>
         </Transition>
@@ -74,6 +80,10 @@ import { useChatStore } from '@/stores/chat';
 import { useAuthStore } from '@/stores/auth';
 import { useSettingsStore } from '@/stores/settings';
 import { useRouter } from 'vue-router';
+
+defineProps<{
+  collapsed: boolean;
+}>();
 
 const chatStore = useChatStore();
 const authStore = useAuthStore();
@@ -141,6 +151,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   user-select: none;
+  transition: width 0.25s ease, min-width 0.25s ease;
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+  min-width: 60px;
 }
 
 .sidebar-header {
@@ -161,6 +178,12 @@ onUnmounted(() => {
   gap: 8px;
   justify-content: center;
   transition: background 0.2s;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.collapsed .new-chat-btn {
+  padding: 10px 0;
 }
 
 .new-chat-btn:hover {
@@ -170,6 +193,7 @@ onUnmounted(() => {
 .new-chat-btn .icon {
   font-size: 18px;
   font-weight: bold;
+  flex-shrink: 0;
 }
 
 .session-list {
@@ -189,6 +213,11 @@ onUnmounted(() => {
   margin-bottom: 2px;
 }
 
+.collapsed .session-item {
+  justify-content: center;
+  padding: 10px 0;
+}
+
 .session-item:hover {
   background: var(--bg-hover);
 }
@@ -203,6 +232,11 @@ onUnmounted(() => {
   gap: 8px;
   overflow: hidden;
   flex: 1;
+}
+
+.collapsed .session-info {
+  justify-content: center;
+  flex: 0;
 }
 
 .session-icon {
@@ -241,6 +275,10 @@ onUnmounted(() => {
   border-top: 1px solid var(--border-color);
 }
 
+.collapsed .sidebar-footer {
+  padding: 8px 6px;
+}
+
 .user-menu-wrapper {
   position: relative;
 }
@@ -254,6 +292,11 @@ onUnmounted(() => {
   border-radius: 8px;
   transition: background 0.15s;
   cursor: pointer;
+}
+
+.collapsed .user-trigger {
+  justify-content: center;
+  padding: 8px 0;
 }
 
 .user-trigger:hover {
@@ -270,6 +313,12 @@ onUnmounted(() => {
   gap: 10px;
   min-width: 0;
   flex: 1;
+  overflow: hidden;
+}
+
+.collapsed .user-trigger-left {
+  flex: 0;
+  justify-content: center;
 }
 
 .user-avatar {
@@ -334,6 +383,12 @@ onUnmounted(() => {
   z-index: 100;
 }
 
+.user-dropdown.dropdown-collapsed {
+  left: -4px;
+  right: -4px;
+  min-width: 140px;
+}
+
 .dropdown-item {
   width: 100%;
   display: flex;
@@ -345,6 +400,7 @@ onUnmounted(() => {
   color: var(--text-primary);
   transition: background 0.15s;
   text-align: left;
+  white-space: nowrap;
 }
 
 .dropdown-item:hover {

@@ -1,9 +1,18 @@
 <template>
   <div class="chat-layout">
-    <Sidebar />
+    <Sidebar :collapsed="sidebarCollapsed" />
     <div class="chat-main">
       <div class="chat-header">
-        <ModelSelector />
+        <div class="header-left">
+          <button
+            class="collapse-btn"
+            @click="sidebarCollapsed = !sidebarCollapsed"
+            :title="sidebarCollapsed ? '展开侧边栏' : '折叠侧边栏'"
+          >
+            {{ sidebarCollapsed ? '☰' : '◁' }}
+          </button>
+          <ModelSelector />
+        </div>
         <div class="header-actions">
           <button
             class="theme-btn"
@@ -58,6 +67,7 @@ import ChatInput from '@/components/ChatInput.vue';
 const chatStore = useChatStore();
 const settingsStore = useSettingsStore();
 const messagesRef = ref<HTMLDivElement | null>(null);
+const sidebarCollapsed = ref(false);
 
 const isDark = computed(() => settingsStore.settings.theme === 'dark');
 
@@ -115,6 +125,25 @@ watch(
   padding: 10px 20px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-secondary);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.collapse-btn {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 16px;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.collapse-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .header-actions {
