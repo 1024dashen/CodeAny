@@ -40,7 +40,10 @@
         >
           <div class="provider-header">
             <span class="provider-name">{{ provider.name }}</span>
-            <span class="provider-id">{{ provider.id }}</span>
+            <div class="provider-header-right">
+              <span class="provider-id">{{ provider.id }}</span>
+              <button class="provider-delete" @click="removeProvider(provider.id, provider.name)" title="删除提供商">删除</button>
+            </div>
           </div>
           <div class="provider-body">
             <div class="setting-row">
@@ -141,6 +144,12 @@ function addModel(providerId: string) {
   if (!modelId) return;
   settingsStore.addModel(providerId, modelId);
   newModelIds[providerId] = '';
+}
+
+function removeProvider(providerId: string, providerName: string) {
+  if (confirm(`确定要删除提供商「${providerName}」吗？删除后不可恢复。`)) {
+    settingsStore.removeProvider(providerId);
+  }
 }
 
 function addCustomProvider() {
@@ -263,6 +272,25 @@ function addCustomProvider() {
   justify-content: space-between;
   padding: 12px 16px;
   background: var(--bg-hover);
+}
+
+.provider-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.provider-delete {
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.provider-delete:hover {
+  color: var(--danger);
+  background: rgba(255, 74, 106, 0.1);
 }
 
 .provider-name {
