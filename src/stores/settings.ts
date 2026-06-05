@@ -14,7 +14,10 @@ function loadSettings(): AppSettings {
       const mergedProviders = DEFAULT_PROVIDERS.map(dp => {
         const savedP = saved.providers.find(sp => sp.id === dp.id);
         if (savedP) {
-          return { ...dp, apiKey: savedP.apiKey, models: dp.models };
+          // Keep default models + any user-added models from saved
+          const defaultModelIds = new Set(dp.models.map(m => m.id));
+          const userModels = savedP.models.filter(m => !defaultModelIds.has(m.id));
+          return { ...dp, apiKey: savedP.apiKey, models: [...dp.models, ...userModels] };
         }
         return dp;
       });
@@ -103,6 +106,29 @@ export const useSettingsStore = defineStore('settings', () => {
     save();
   }
 
+  function addModel(providerId: string, modelId: string, modelName?: string) {
+    const provider = settings.value.providers.find(p => p.id === providerId);
+    if (!provider) return;
+    // Avoid duplicate
+    if (provider.models.some(m => m.id === modelId)) return;
+    provider.models.push({
+      id: modelId,
+      name: modelName || modelId,
+      providerId,
+    });
+    save();
+  }
+
+  function removeModel(providerId: string, modelId: string) {
+    const provider = settings.value.providers.find(p => p.id === providerId);
+    if (!provider) return;
+    provider.models = provider.models.filter(m => m.id !== modelId);
+    if (settings.value.activeModelId === modelId) {
+      settings.value.activeModelId = provider.models[0]?.id || '';
+    }
+    save();
+  }
+
   function setTheme(theme: 'light' | 'dark') {
     settings.value.theme = theme;
     document.documentElement.setAttribute('data-theme', theme);
@@ -128,6 +154,8 @@ export const useSettingsStore = defineStore('settings', () => {
     updateProvider,
     addProvider,
     removeProvider,
+    addModel,
+    removeModel,
     setTheme,
     setSystemPrompt,
     save,

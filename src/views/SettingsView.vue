@@ -68,9 +68,23 @@
             </div>
             <div class="provider-models">
               <span class="models-label">可用模型:</span>
-              <span v-for="model in provider.models" :key="model.id" class="model-tag">
-                {{ model.name }}
-              </span>
+              <div
+                v-for="model in provider.models"
+                :key="model.id"
+                class="model-tag"
+              >
+                <span>{{ model.name }}</span>
+                <button class="model-remove" @click="settingsStore.removeModel(provider.id, model.id)" title="移除模型">✕</button>
+              </div>
+              <div class="add-model-row">
+                <input
+                  v-model="newModelIds[provider.id]"
+                  class="add-model-input"
+                  placeholder="模型 ID"
+                  @keydown.enter="addModel(provider.id)"
+                />
+                <button class="add-model-btn" @click="addModel(provider.id)">+</button>
+              </div>
             </div>
           </div>
         </div>
@@ -109,6 +123,7 @@ import { useSettingsStore } from '@/stores/settings';
 
 const settingsStore = useSettingsStore();
 const showKeys = ref<Record<string, boolean>>({});
+const newModelIds = reactive<Record<string, string>>({});
 
 const newProvider = reactive({
   name: '',
@@ -119,6 +134,13 @@ const newProvider = reactive({
 
 function toggleKey(providerId: string) {
   showKeys.value[providerId] = !showKeys.value[providerId];
+}
+
+function addModel(providerId: string) {
+  const modelId = newModelIds[providerId]?.trim();
+  if (!modelId) return;
+  settingsStore.addModel(providerId, modelId);
+  newModelIds[providerId] = '';
 }
 
 function addCustomProvider() {
@@ -295,11 +317,61 @@ function addCustomProvider() {
 }
 
 .model-tag {
-  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
   border-radius: 4px;
   font-size: 12px;
   background: var(--bg-hover);
   color: var(--text-secondary);
+}
+
+.model-remove {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 0 2px;
+  border-radius: 2px;
+  line-height: 1;
+}
+
+.model-remove:hover {
+  color: var(--danger);
+}
+
+.add-model-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.add-model-input {
+  width: 120px;
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.add-model-input:focus {
+  border-color: var(--accent);
+}
+
+.add-model-btn {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  background: var(--accent);
+  color: white;
+  line-height: 1;
+}
+
+.add-model-btn:hover {
+  background: var(--accent-hover);
 }
 
 .add-provider-form {
