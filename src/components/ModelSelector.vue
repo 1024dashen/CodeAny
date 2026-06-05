@@ -1,55 +1,125 @@
 <template>
   <div class="model-selector">
-    <select
-      class="provider-select"
-      :value="settingsStore.settings.activeProviderId"
-      @change="settingsStore.setActiveProvider(($event.target as HTMLSelectElement).value)"
-    >
-      <option
-        v-for="provider in settingsStore.allProviders"
-        :key="provider.id"
-        :value="provider.id"
-      >
-        {{ provider.name }}
-      </option>
-    </select>
-    <select
-      class="model-select"
-      :value="settingsStore.settings.activeModelId"
-      @change="settingsStore.setActiveModel(($event.target as HTMLSelectElement).value)"
-    >
-      <option
-        v-for="model in currentModels"
-        :key="model.id"
-        :value="model.id"
-      >
-        {{ model.name }}
-      </option>
-    </select>
+    <!-- 提供商选择 -->
+    <div class="selector-wrapper" @click.stop="toggleProviderMenu">
+      <button class="selector-btn provider-btn" :class="{ active: showProviderMenu }">
+        <span class="selector-text">{{ activeProviderName }}</span>
+        <span class="selector-arrow" :class="{ open: showProviderMenu }">▾</span>
+      </button>
+      <Transition name="dropdown">
+        <div v-if="showProviderMenu" class="selector-dropdown provider-dropdown">
+          <div
+            v-for="provider in settingsStore.allProviders"
+            :key="provider.id"
+            class="dropdown-item"
+            :class="{ selected: provider.id === settingsStore.settings.activeProviderId }"
+            @click.stop="selectProvider(provider.id)"
+          >
+            <span class="item-check">{{ provider.id === settingsStore.settings.activeProviderId ? '✓' : '' }}</span>
+            <span class="item-name">{{ provider.name }}</span>
+            <span v-if="provider.apiKey" class="item-badge connected">已连接</span>
+            <span v-else class="item-badge">未配置</span>
+          </div>
+        </div>
+      </Transition>
+    </div>
+
+    <!-- 模型选择 -->
+    <div class="selector-wrapper" @click.stop="toggleModelMenu">
+      <button class="selector-btn model-btn" :class="{ active: showModelMenu }">
+        <span class="selector-text">{{ activeModelName }}</span>
+        <span class="selector-arrow" :class="{ open: showModelMenu }">▾</span>
+      </button>
+      <Transition name="dropdown">
+        <div v-if="showModelMenu" class="selector-dropdown model-dropdown">
+          <div
+            v-for="model in currentModels"
+            :key="model.id"
+            class="dropdown-item"
+            :class="{ selected: model.id === settingsStore.settings.activeModelId }"
+            @click.stop="selectModel(model.id)"
+          >
+            <span class="item-check">{{ model.id === settingsStore.settings.activeModelId ? '✓' : '' }}</span>
+            <span class="item-name">{{ model.name }}</span>
+          </div>
+          <div v-if="currentModels.length === 0" class="dropdown-empty">
+            暂无可用模型
+          </div>
+        </div>
+      </Transition>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useSettingsStore } from '@/stores/settings';
 
 const settingsStore = useSettingsStore();
+const showProviderMenu = ref(false);
+const showModelMenu = ref(false);
+
+const activeProviderName = computed(() => {
+  return settingsStore.activeProvider?.name || '选择提供商';
+});
+
+const activeModelName = computed(() => {
+  return settingsStore.activeModel?.name || '选择模型';
+});
 
 const currentModels = computed(() => {
-  const provider = settingsStore.activeProvider;
-  return provider?.models || [];
+  return settingsStore.activeProvider?.models || [];
+});
+
+function toggleProviderMenu() {
+  showModelMenu.value = false;
+  showProviderMenu.value = !showProviderMenu.value;
+}
+
+function toggleModelMenu() {
+  showProviderMenu.value = false;
+  showModelMenu.value = !showModelMenu.value;
+}
+
+function selectProvider(id: string) {
+  settingsStore.setActiveProvider(id);
+  showProviderMenu.value = false;
+}
+
+function selectModel(id: string) {
+  settingsStore.setActiveModel(id);
+  showModelMenu.value = false;
+}
+
+function closeMenus() {
+  showProviderMenu.value = false;
+  showModelMenu.value = false;
+}
+
+onMounted(() => {
+  document.addEventListener('click', closeMenus);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeMenus);
 });
 </script>
 
 <style scoped>
 .model-selector {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
-.provider-select,
-.model-select {
+.selector-wrapper {
+  position: relative;
+}
+
+.selector-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 12px;
   border-radius: 8px;
   font-size: 13px;
@@ -57,19 +127,126 @@ const currentModels = computed(() => {
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   cursor: pointer;
-  outline: none;
+  transition: all 0.15s;
+  white-space: nowrap;
 }
 
-.provider-select:focus,
-.model-select:focus {
+.selector-btn:hover {
   border-color: var(--accent);
+  background: var(--bg-hover);
 }
 
-.provider-select {
-  min-width: 120px;
+.selector-btn.active {
+  border-color: var(--accent);
+  background: var(--bg-hover);
 }
 
-.model-select {
-  min-width: 160px;
+.provider-btn {
+  min-width: 110px;
+}
+
+.model-btn {
+  min-width: 140px;
+}
+
+.selector-text {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selector-arrow {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.selector-arrow.open {
+  transform: rotate(180deg);
+}
+
+.selector-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: var(--shadow);
+  z-index: 200;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-hover);
+}
+
+.dropdown-item.selected {
+  background: var(--bg-active);
+}
+
+.item-check {
+  width: 14px;
+  font-size: 12px;
+  color: var(--accent);
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.item-badge.connected {
+  background: rgba(74, 255, 138, 0.12);
+  color: var(--success);
+}
+
+.dropdown-empty {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* 下拉动画 */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>

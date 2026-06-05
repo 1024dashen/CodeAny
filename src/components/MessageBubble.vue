@@ -11,14 +11,19 @@
           <span v-if="message.model" class="message-model">{{ message.model }}</span>
           <span class="message-time">{{ formatTime(message.timestamp) }}</span>
         </div>
-        <div class="message-bubble">
-          <div v-if="message.error" class="message-error">
-            ⚠️ {{ message.error }}
+        <div class="message-bubble-wrap">
+          <div class="message-bubble">
+            <div v-if="message.error" class="message-error">
+              ⚠️ {{ message.error }}
+            </div>
+            <div v-else-if="message.isLoading && !message.content" class="message-loading-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <div v-else class="markdown-body" v-html="renderedContent"></div>
           </div>
-          <div v-else-if="message.isLoading && !message.content" class="message-loading-dots">
-            <span></span><span></span><span></span>
-          </div>
-          <div v-else class="markdown-body" v-html="renderedContent"></div>
+          <button v-if="message.content" class="copy-btn" @click="copyMessage" :title="copied ? '已复制' : '复制'">
+            {{ copied ? '✓' : '📋' }}
+          </button>
         </div>
       </div>
     </template>
@@ -30,11 +35,16 @@
           <span class="message-time">{{ formatTime(message.timestamp) }}</span>
           <span class="message-role">你</span>
         </div>
-        <div class="message-bubble is-user">
-          <div v-if="message.error" class="message-error">
-            ⚠️ {{ message.error }}
+        <div class="message-bubble-wrap is-right">
+          <button v-if="message.content" class="copy-btn" @click="copyMessage" :title="copied ? '已复制' : '复制'">
+            {{ copied ? '✓' : '📋' }}
+          </button>
+          <div class="message-bubble is-user">
+            <div v-if="message.error" class="message-error">
+              ⚠️ {{ message.error }}
+            </div>
+            <div v-else class="message-text">{{ message.content }}</div>
           </div>
-          <div v-else class="message-text">{{ message.content }}</div>
         </div>
       </div>
       <div class="message-avatar">
@@ -45,13 +55,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { ChatMessage } from '@/types';
 import { renderMarkdown } from '@/utils/markdown';
 
 const props = defineProps<{
   message: ChatMessage;
 }>();
+
+const copied = ref(false);
 
 const renderedContent = computed(() => {
   if (!props.message.content) return '';
@@ -65,6 +77,25 @@ const renderedContent = computed(() => {
 function formatTime(ts: number): string {
   const d = new Date(ts);
   return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+}
+
+async function copyMessage() {
+  if (!props.message.content) return;
+  try {
+    await navigator.clipboard.writeText(props.message.content);
+    copied.value = true;
+    setTimeout(() => { copied.value = false; }, 1500);
+  } catch {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = props.message.content;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    copied.value = true;
+    setTimeout(() => { copied.value = false; }, 1500);
+  }
 }
 </script>
 
@@ -102,6 +133,16 @@ function formatTime(ts: number): string {
 .message-body {
   max-width: 70%;
   min-width: 0;
+}
+
+.message-bubble-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.message-bubble-wrap.is-right {
+  flex-direction: row-reverse;
 }
 
 .message-header {
@@ -157,6 +198,36 @@ function formatTime(ts: number): string {
 
 .message-text {
   white-space: pre-wrap;
+}
+
+.copy-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: transparent;
+  opacity: 0;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.message-bubble-wrap:hover .copy-btn {
+  opacity: 1;
+}
+
+.copy-btn:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+  opacity: 1;
+}
+
+.copy-btn:active {
+  transform: scale(0.9);
 }
 
 .message-error {
