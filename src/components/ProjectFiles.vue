@@ -41,6 +41,9 @@ const selectedFile = computed(() =>
   border: 1px solid var(--border-color);
   border-radius: 10px;
   background: var(--bg-secondary);
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .files-header {

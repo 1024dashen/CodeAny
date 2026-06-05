@@ -123,6 +123,8 @@ async function copyMessage() {
   display: flex;
   gap: 10px;
   padding: 12px 20px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* 用户消息：整行右对齐 */
@@ -150,7 +152,7 @@ async function copyMessage() {
 }
 
 .message-body {
-  max-width: 70%;
+  max-width: 100%;
   min-width: 0;
 }
 
@@ -158,6 +160,8 @@ async function copyMessage() {
   display: flex;
   align-items: flex-end;
   gap: 4px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .message-bubble-wrap.is-right {
@@ -203,6 +207,32 @@ async function copyMessage() {
   font-size: 14px;
   line-height: 1.7;
   word-break: break-word;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.message-bubble :deep(.markdown-body) {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.message-bubble :deep(.markdown-body pre) {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.message-bubble :deep(.markdown-body pre code) {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.message-bubble :deep(.markdown-body table) {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .message-bubble.is-user {
@@ -217,6 +247,8 @@ async function copyMessage() {
 
 .message-text {
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .copy-btn {

@@ -119,6 +119,8 @@ select {
   font-size: 14px;
   line-height: 1.7;
   word-wrap: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 .markdown-body p {
@@ -140,7 +142,8 @@ select {
 .markdown-body pre {
   margin: 8px 0;
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 .markdown-body pre code {
@@ -148,6 +151,8 @@ select {
   padding: 12px 16px;
   background: var(--bg-sidebar);
   overflow-x: auto;
+  white-space: pre;
+  word-break: normal;
 }
 
 .markdown-body ul, .markdown-body ol {
@@ -165,7 +170,9 @@ select {
 .markdown-body table {
   border-collapse: collapse;
   margin: 8px 0;
-  width: 100%;
+  max-width: 100%;
+  display: block;
+  overflow-x: auto;
 }
 
 .markdown-body th, .markdown-body td {

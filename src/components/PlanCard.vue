@@ -32,6 +32,8 @@ defineEmits<{
   border: 1px solid var(--accent);
   border-radius: 10px;
   background: rgba(74, 158, 255, 0.06);
+  max-width: 100%;
+  min-width: 0;
 }
 
 .plan-card-header {

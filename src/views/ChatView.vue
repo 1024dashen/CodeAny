@@ -289,6 +289,7 @@ watch(
 .chat-messages {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   scroll-behavior: smooth;
 }
 
