@@ -24,15 +24,7 @@
           >
             工作区
           </button>
-          <button
-            v-if="chatStore.canPreview"
-            class="preview-btn"
-            :disabled="previewLoading"
-            @click="handlePreview"
-            title="预览应用"
-          >
-            {{ previewLoading ? '启动中...' : '▶ 预览' }}
-          </button>
+          <PreviewSelector v-if="chatStore.canPreview" />
           <button
             class="theme-btn"
             @click="settingsStore.setTheme(isDark ? 'light' : 'dark')"
@@ -94,10 +86,10 @@ import { ref, computed, watch, nextTick } from 'vue';
 import { useChatStore } from '@/stores/chat';
 import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { openProjectPreview } from '@/utils/preview';
 import type { ChatMessage } from '@/types';
 import Sidebar from '@/components/Sidebar.vue';
 import ModelSelector from '@/components/ModelSelector.vue';
+import PreviewSelector from '@/components/PreviewSelector.vue';
 import MessageBubble from '@/components/MessageBubble.vue';
 import ChatInput from '@/components/ChatInput.vue';
 import WorkspaceSetup from '@/components/WorkspaceSetup.vue';
@@ -107,9 +99,6 @@ const settingsStore = useSettingsStore();
 const workspaceStore = useWorkspaceStore();
 const messagesRef = ref<HTMLDivElement | null>(null);
 const sidebarCollapsed = ref(false);
-const previewLoading = ref(false);
-const previewError = ref('');
-
 const isDark = computed(() => settingsStore.settings.theme === 'dark');
 
 const shortWorkspacePath = computed(() => {
@@ -157,22 +146,6 @@ function scrollToBottom() {
 async function quickSend(text: string) {
   await workspaceStore.ensureWorkspaceRoot();
   await chatStore.sendMessage(text);
-}
-
-async function handlePreview() {
-  const session = chatStore.activeSession;
-  if (!session?.projectDir) return;
-
-  previewLoading.value = true;
-  previewError.value = '';
-  try {
-    await openProjectPreview(session.id, session.title, session.projectDir);
-  } catch (err) {
-    previewError.value = err instanceof Error ? err.message : '预览启动失败';
-    alert(previewError.value);
-  } finally {
-    previewLoading.value = false;
-  }
 }
 
 watch(
@@ -247,7 +220,6 @@ watch(
 }
 
 .workspace-btn,
-.preview-btn,
 .clear-btn {
   padding: 6px 12px;
   border-radius: 6px;
@@ -259,20 +231,6 @@ watch(
 .workspace-btn:hover,
 .clear-btn:hover {
   background: var(--bg-hover);
-}
-
-.preview-btn {
-  background: var(--accent);
-  color: white;
-}
-
-.preview-btn:hover:not(:disabled) {
-  background: var(--accent-hover);
-}
-
-.preview-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .clear-btn:hover {

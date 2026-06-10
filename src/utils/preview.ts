@@ -1,6 +1,16 @@
 import { invoke } from '@tauri-apps/api/core';
+import { LogicalSize } from '@tauri-apps/api/dpi';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { open } from '@tauri-apps/plugin-shell';
 import { isTauriEnv } from '@/utils/store';
+
+export type PreviewMode = 'phone' | 'ipad' | 'desktop' | 'browser';
+
+const PREVIEW_SIZES: Record<Exclude<PreviewMode, 'browser'>, { width: number; height: number }> = {
+  phone: { width: 390, height: 844 },
+  ipad: { width: 820, height: 1180 },
+  desktop: { width: 1280, height: 800 },
+};
 
 const activePreviewPorts = new Map<string, number>();
 
@@ -14,7 +24,52 @@ function stopPreviewServer(sessionId: string): void {
   });
 }
 
+async function ensurePreviewServer(sessionId: string, projectDir: string): Promise<number> {
+  const existing = activePreviewPorts.get(sessionId);
+  if (existing !== undefined) return existing;
+
+  const port = await invoke<number>('start_preview_server', { projectDir });
+  activePreviewPorts.set(sessionId, port);
+  return port;
+}
+
+function previewWindowLabel(sessionId: string): string {
+  return `preview-${sessionId}`;
+}
+
+async function openPreviewWindow(
+  sessionId: string,
+  sessionTitle: string,
+  url: string,
+  mode: Exclude<PreviewMode, 'browser'>,
+): Promise<void> {
+  const label = previewWindowLabel(sessionId);
+  const { width, height } = PREVIEW_SIZES[mode];
+  const existingWin = await WebviewWindow.getByLabel(label);
+
+  if (existingWin) {
+    await existingWin.setSize(new LogicalSize(width, height));
+    await existingWin.center();
+    await existingWin.setFocus();
+    return;
+  }
+
+  const previewWin = new WebviewWindow(label, {
+    url,
+    title: `预览 - ${sessionTitle}`,
+    width,
+    height,
+    center: true,
+    resizable: true,
+  });
+
+  previewWin.once('tauri://destroyed', () => {
+    stopPreviewServer(sessionId);
+  });
+}
+
 export async function openProjectPreview(
+  mode: PreviewMode,
   sessionId: string,
   sessionTitle: string,
   projectDir: string,
@@ -23,30 +78,15 @@ export async function openProjectPreview(
     throw new Error('预览功能仅在 Tauri 桌面应用中可用');
   }
 
-  const existingLabel = `preview-${sessionId}`;
-  const existingWin = await WebviewWindow.getByLabel(existingLabel);
-  if (existingWin) {
-    stopPreviewServer(sessionId);
-    await existingWin.close();
+  const port = await ensurePreviewServer(sessionId, projectDir);
+  const url = `http://127.0.0.1:${port}/`;
+
+  if (mode === 'browser') {
+    await open(url);
+    return;
   }
 
-  const port = await invoke<number>('start_preview_server', { projectDir });
-  activePreviewPorts.set(sessionId, port);
-
-  const label = `preview-${sessionId}`;
-  const previewWin = new WebviewWindow(label, {
-    url: `http://127.0.0.1:${port}/`,
-    title: `预览 - ${sessionTitle}`,
-    width: 960,
-    height: 720,
-    center: true,
-    resizable: true,
-  });
-
-  // 窗口销毁后再停止服务，避免 onCloseRequested 里 await 阻塞关闭流程
-  previewWin.once('tauri://destroyed', () => {
-    stopPreviewServer(sessionId);
-  });
+  await openPreviewWindow(sessionId, sessionTitle, url, mode);
 }
 
 export async function writeProjectFilesToDisk(
