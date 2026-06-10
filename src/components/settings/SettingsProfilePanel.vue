@@ -11,6 +11,9 @@
           <span class="join-date">{{ t('profile.joinedAt', { date: formatDate(authStore.user?.createdAt) }) }}</span>
         </div>
       </div>
+      <button class="logout-btn" @click="handleLogout">
+        ⏻ {{ t('sidebar.logout') }}
+      </button>
     </section>
 
     <section class="profile-section">
@@ -71,10 +74,12 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
 const { t, locale } = useI18n();
 const authStore = useAuthStore();
+const router = useRouter();
 const saving = ref(false);
 const pwdError = ref('');
 const pwdSuccess = ref('');
@@ -89,6 +94,11 @@ const pwdForm = reactive({
 const canChangePwd = computed(
   () => pwdForm.oldPassword && pwdForm.newPassword.length >= 6 && pwdForm.newPassword === pwdForm.confirmPassword,
 );
+
+async function handleLogout() {
+  await authStore.logout();
+  router.push('/login');
+}
 
 async function saveNickname() {
   if (!nicknameForm.value.trim()) return;
@@ -156,6 +166,10 @@ function formatDate(ts?: number): string {
 }
 
 .profile-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 12px;
@@ -166,6 +180,25 @@ function formatDate(ts?: number): string {
   display: flex;
   align-items: center;
   gap: 20px;
+  min-width: 0;
+}
+
+.logout-btn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--danger);
+  background: rgba(255, 74, 106, 0.1);
+  border: 1px solid rgba(255, 74, 106, 0.25);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 74, 106, 0.18);
+  border-color: var(--danger);
 }
 
 .avatar-large {
