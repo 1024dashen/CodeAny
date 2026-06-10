@@ -89,7 +89,7 @@ watch(
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 24px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-secondary);
   flex-shrink: 0;
