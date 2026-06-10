@@ -75,7 +75,7 @@ async function handlePreview(mode: PreviewMode) {
 
 .preview-label {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   padding-left: 6px;
   white-space: nowrap;
 }
@@ -97,14 +97,11 @@ async function handlePreview(mode: PreviewMode) {
   transition: all 0.2s;
 }
 
-.preview-mode-btn:hover:not(:disabled) {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-}
-
+.preview-mode-btn:hover:not(:disabled),
 .preview-mode-btn.active {
   background: var(--accent);
   color: white;
+  opacity: 1;
 }
 
 .preview-mode-btn:disabled {
