@@ -6,10 +6,12 @@
       <h4>{{ t('editor.appearance') }}</h4>
       <div class="setting-row">
         <label>{{ t('editor.theme') }}</label>
-        <select :value="settingsStore.settings.theme" @change="settingsStore.setTheme(($event.target as HTMLSelectElement).value as 'light' | 'dark')">
-          <option value="dark">{{ t('editor.themeDark') }}</option>
-          <option value="light">{{ t('editor.themeLight') }}</option>
-        </select>
+        <NSelect
+          class="setting-select"
+          :value="settingsStore.settings.theme"
+          :options="themeOptions"
+          @update:value="settingsStore.setTheme"
+        />
       </div>
       <div class="setting-row">
         <label>{{ t('lang.label') }}</label>
@@ -36,15 +38,12 @@
       <h4>{{ t('editor.inputBehavior') }}</h4>
       <div class="setting-row">
         <label>{{ t('editor.fontSize') }}</label>
-        <select
+        <NSelect
+          class="setting-select"
           :value="settingsStore.settings.fontSize"
-          @change="settingsStore.setFontSize(Number(($event.target as HTMLSelectElement).value))"
-        >
-          <option :value="12">12px</option>
-          <option :value="14">14px</option>
-          <option :value="16">16px</option>
-          <option :value="18">18px</option>
-        </select>
+          :options="fontSizeOptions"
+          @update:value="settingsStore.setFontSize"
+        />
       </div>
       <div class="setting-row checkbox-row">
         <label>{{ t('editor.enterSend') }}</label>
@@ -65,7 +64,9 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { NSelect, type SelectOption } from 'naive-ui';
 import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
@@ -73,6 +74,18 @@ import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const workspaceStore = useWorkspaceStore();
+
+const themeOptions = computed<SelectOption[]>(() => [
+  { label: t('editor.themeDark'), value: 'dark' },
+  { label: t('editor.themeLight'), value: 'light' },
+]);
+
+const fontSizeOptions = computed<SelectOption[]>(() =>
+  [12, 14, 16, 18].map(size => ({
+    label: `${size}px`,
+    value: size,
+  })),
+);
 </script>
 
 <style scoped>
@@ -110,8 +123,7 @@ const workspaceStore = useWorkspaceStore();
   flex-shrink: 0;
 }
 
-.setting-row input,
-.setting-row select {
+.setting-row input {
   flex: 1;
   padding: 8px 12px;
   border-radius: 8px;
@@ -122,9 +134,12 @@ const workspaceStore = useWorkspaceStore();
   outline: none;
 }
 
-.setting-row input:focus,
-.setting-row select:focus {
+.setting-row input:focus {
   border-color: var(--accent);
+}
+
+.setting-select {
+  flex: 1;
 }
 
 .checkbox-row {
