@@ -18,6 +18,7 @@ import {
 } from '@/utils/codeParser';
 import { writeProjectFilesToDisk } from '@/utils/preview';
 import { applyGeneratedAppDefaults } from '@/utils/generatedAppDefaults';
+import { ensureSessionIcon, pickRandomAppIcon } from '@/utils/sessionIcon';
 
 const STORAGE_KEY = 'sessions';
 
@@ -43,10 +44,10 @@ function defaultSession(
 }
 
 function normalizeSession(session: ChatSession): ChatSession {
-  return {
+  return ensureSessionIcon({
     ...session,
     generationPhase: session.generationPhase ?? 'idle',
-  };
+  });
 }
 
 export const useChatStore = defineStore('chat', () => {
@@ -438,6 +439,7 @@ export const useChatStore = defineStore('chat', () => {
           await writeProjectFilesToDisk(session.projectDir, filesWithDefaults);
           session.projectFiles = filesWithDefaults;
           session.generationPhase = 'done';
+          if (!session.icon) session.icon = pickRandomAppIcon();
         } catch (err) {
           updateAssistantMessage(session.id, assistantMsgId, {
             error: err instanceof Error ? err.message : '写入文件失败',
@@ -451,6 +453,7 @@ export const useChatStore = defineStore('chat', () => {
         );
         session.projectFiles = filesWithDefaults;
         session.generationPhase = 'done';
+        if (!session.icon) session.icon = pickRandomAppIcon();
         updateAssistantMessage(session.id, assistantMsgId, {
           error: '未设置工作区目录，文件仅保存在内存中',
         });
@@ -477,6 +480,7 @@ export const useChatStore = defineStore('chat', () => {
       session.generationPhase = 'idle';
       session.planContent = undefined;
       session.projectFiles = undefined;
+      session.icon = undefined;
       session.updatedAt = Date.now();
       flushSave();
     }

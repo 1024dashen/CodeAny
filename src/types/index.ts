@@ -34,6 +34,7 @@ export interface ChatSession {
   planContent?: string;
   projectFiles?: ProjectFile[];
   projectDir?: string;
+  icon?: string;
 }
 
 export type GenerationPhase =

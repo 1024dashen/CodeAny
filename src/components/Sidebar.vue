@@ -17,7 +17,7 @@
         :title="collapsed ? session.title : ''"
       >
         <div class="session-info">
-          <span class="session-icon">💬</span>
+          <span class="session-icon" :class="{ 'icon-collapsed': collapsed }">{{ getSessionIcon(session) }}</span>
           <span v-if="!collapsed" class="session-title">{{ session.title }}</span>
         </div>
         <button v-if="!collapsed" class="session-delete" @click.stop="chatStore.deleteSession(session.id)" title="删除对话">
@@ -86,6 +86,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useRouter } from 'vue-router';
+import { getSessionIcon } from '@/utils/sessionIcon';
 
 defineProps<{
   collapsed: boolean;
@@ -247,18 +248,29 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  overflow: hidden;
+  min-width: 0;
   flex: 1;
 }
 
 .collapsed .session-info {
   justify-content: center;
-  flex: 0;
+  flex: none;
+  min-width: auto;
 }
 
 .session-icon {
   font-size: 14px;
   flex-shrink: 0;
+}
+
+.session-icon.icon-collapsed {
+  font-size: 22px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
 }
 
 .session-title {
@@ -330,11 +342,11 @@ onUnmounted(() => {
   gap: 10px;
   min-width: 0;
   flex: 1;
-  overflow: hidden;
 }
 
 .collapsed .user-trigger-left {
-  flex: 0;
+  flex: none;
+  min-width: auto;
   justify-content: center;
 }
 
@@ -356,6 +368,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow: hidden;
 }
 
 .user-name {
