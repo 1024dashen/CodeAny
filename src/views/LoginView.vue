@@ -1,5 +1,6 @@
 <template>
   <div class="auth-page">
+    <AuthPreferences />
     <div class="auth-card">
       <div class="auth-logo">🤖</div>
       <h1 class="auth-title">CodeAny</h1>
@@ -57,6 +58,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
+import AuthPreferences from '@/components/AuthPreferences.vue';
 
 const { t } = useI18n();
 const authStore = useAuthStore();

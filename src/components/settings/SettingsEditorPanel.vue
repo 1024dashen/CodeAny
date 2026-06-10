@@ -13,14 +13,7 @@
       </div>
       <div class="setting-row">
         <label>{{ t('lang.label') }}</label>
-        <select
-          :value="settingsStore.settings.locale"
-          @change="settingsStore.setLocale(($event.target as HTMLSelectElement).value as AppLocale)"
-        >
-          <option v-for="loc in SUPPORTED_LOCALES" :key="loc" :value="loc">
-            {{ t(`lang.${loc}`) }}
-          </option>
-        </select>
+        <LanguageSwitcher block />
       </div>
     </section>
 
@@ -75,8 +68,7 @@
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { SUPPORTED_LOCALES } from '@/i18n';
-import type { AppLocale } from '@/types';
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();

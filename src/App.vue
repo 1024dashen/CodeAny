@@ -1,6 +1,8 @@
 <template>
-  <router-view v-if="isReady" />
-  <div v-else class="app-loading">{{ $t('common.loading') }}</div>
+  <NaiveProvider>
+    <router-view v-if="isReady" />
+    <div v-else class="app-loading">{{ $t('common.loading') }}</div>
+  </NaiveProvider>
 </template>
 
 <script setup lang="ts">
@@ -8,6 +10,7 @@ import { ref, onMounted } from 'vue';
 import { useChatStore } from '@/stores/chat';
 import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
+import NaiveProvider from '@/components/NaiveProvider.vue';
 
 const isReady = ref(false);
 
