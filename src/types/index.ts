@@ -49,6 +49,15 @@ export interface ProjectFile {
   content: string;
 }
 
+export type ServiceProviderId = 'github' | 'cloudflare' | 'netlify' | 'vercel';
+
+export interface ServiceTokens {
+  github: string;
+  cloudflare: string;
+  netlify: string;
+  vercel: string;
+}
+
 export interface AppSettings {
   providers: ModelProvider[];
   activeProviderId: string;
@@ -58,6 +67,7 @@ export interface AppSettings {
   sendOnEnter: boolean;
   systemPrompt: string;
   generationPrompt: string;
+  serviceTokens: ServiceTokens;
 }
 
 export interface User {

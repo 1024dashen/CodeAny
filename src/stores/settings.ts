@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { AppSettings, ModelProvider } from '@/types';
+import type { AppSettings, ModelProvider, ServiceProviderId } from '@/types';
 import { DEFAULT_PROVIDERS } from '@/utils/providers';
+import { defaultServiceTokens } from '@/utils/serviceProviders';
 import { loadStorageValue, saveStorageValue } from '@/utils/store';
 
 const STORAGE_KEY = 'settings';
@@ -22,6 +23,7 @@ function mergeSettings(saved: AppSettings): AppSettings {
   return {
     ...saved,
     generationPrompt: saved.generationPrompt ?? '',
+    serviceTokens: { ...defaultServiceTokens(), ...saved.serviceTokens },
     providers: [...mergedProviders, ...customProviders],
   };
 }
@@ -36,6 +38,7 @@ function defaultSettings(): AppSettings {
     sendOnEnter: true,
     systemPrompt: '',
     generationPrompt: '',
+    serviceTokens: defaultServiceTokens(),
   };
 }
 
@@ -157,6 +160,16 @@ export const useSettingsStore = defineStore('settings', () => {
     save();
   }
 
+  function setServiceToken(providerId: ServiceProviderId, token: string) {
+    settings.value.serviceTokens[providerId] = token;
+    save();
+  }
+
+  function clearServiceToken(providerId: ServiceProviderId) {
+    settings.value.serviceTokens[providerId] = '';
+    save();
+  }
+
   return {
     settings,
     isHydrated,
@@ -177,6 +190,8 @@ export const useSettingsStore = defineStore('settings', () => {
     setGenerationPrompt,
     setFontSize,
     setSendOnEnter,
+    setServiceToken,
+    clearServiceToken,
     save,
   };
 });
