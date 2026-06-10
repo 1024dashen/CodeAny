@@ -5,6 +5,7 @@
         ref="textareaRef"
         v-model="inputText"
         :placeholder="inputPlaceholder"
+        :style="{ fontSize: settingsStore.settings.fontSize + 'px' }"
         rows="1"
         @input="autoResize"
         @keydown="handleKeydown"
@@ -35,15 +36,20 @@
 <script setup lang="ts">
 import { ref, computed, nextTick } from 'vue';
 import { useChatStore } from '@/stores/chat';
+import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
 
 const chatStore = useChatStore();
+const settingsStore = useSettingsStore();
 
-const inputPlaceholder = computed(() =>
-  chatStore.isPlanRevisionMode
-    ? '描述你想修改或补充的内容，例如：增加深色模式、去掉某个功能...'
-    : '输入消息... (Shift+Enter 换行, Enter 发送)',
-);
+const inputPlaceholder = computed(() => {
+  if (chatStore.isPlanRevisionMode) {
+    return '描述你想修改或补充的内容，例如：增加深色模式、去掉某个功能...';
+  }
+  return settingsStore.settings.sendOnEnter
+    ? '输入消息... (Shift+Enter 换行, Enter 发送)'
+    : '输入消息... (Enter 换行)';
+});
 const workspaceStore = useWorkspaceStore();
 const inputText = ref('');
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
@@ -57,10 +63,10 @@ function autoResize() {
 }
 
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    handleSend();
-  }
+  if (e.key !== 'Enter' || e.shiftKey) return;
+  if (!settingsStore.settings.sendOnEnter) return;
+  e.preventDefault();
+  handleSend();
 }
 
 async function handleSend() {

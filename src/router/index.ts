@@ -18,9 +18,7 @@ const router = createRouter({
     },
     {
       path: '/profile',
-      name: 'profile',
-      component: () => import('@/views/ProfileView.vue'),
-      meta: { requiresAuth: true },
+      redirect: { path: '/settings', query: { tab: 'profile' } },
     },
     {
       path: '/login',

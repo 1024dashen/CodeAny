@@ -147,6 +147,16 @@ export const useSettingsStore = defineStore('settings', () => {
     save();
   }
 
+  function setFontSize(fontSize: number) {
+    settings.value.fontSize = fontSize;
+    save();
+  }
+
+  function setSendOnEnter(sendOnEnter: boolean) {
+    settings.value.sendOnEnter = sendOnEnter;
+    save();
+  }
+
   return {
     settings,
     isHydrated,
@@ -165,6 +175,8 @@ export const useSettingsStore = defineStore('settings', () => {
     setTheme,
     setSystemPrompt,
     setGenerationPrompt,
+    setFontSize,
+    setSendOnEnter,
     save,
   };
 });

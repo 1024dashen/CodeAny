@@ -120,12 +120,12 @@ function closeUserMenu() {
 
 function goProfile() {
   closeUserMenu();
-  router.push('/profile');
+  router.push({ path: '/settings', query: { tab: 'profile' } });
 }
 
 function goSettings() {
   closeUserMenu();
-  router.push('/settings');
+  router.push({ path: '/settings', query: { tab: 'model' } });
 }
 
 function openHelp() {

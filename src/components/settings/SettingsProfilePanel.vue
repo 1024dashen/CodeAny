@@ -1,79 +1,70 @@
 <template>
-  <div class="profile-page">
-    <div class="profile-header">
-      <button class="back-btn" @click="$router.push('/')">← 返回</button>
-      <h2>个人中心</h2>
-    </div>
+  <div class="settings-panel">
+    <h3 class="panel-title">个人中心</h3>
 
-    <div class="profile-body">
-      <!-- 头像 & 基本信息 -->
-      <section class="profile-card">
-        <div class="avatar-section">
-          <div class="avatar-large">{{ authStore.userNickname.charAt(0).toUpperCase() }}</div>
-          <div class="basic-info">
-            <span class="nickname">{{ authStore.userNickname }}</span>
-            <span class="email">{{ authStore.userEmail }}</span>
-            <span class="join-date">注册于 {{ formatDate(authStore.user?.createdAt) }}</span>
-          </div>
+    <section class="profile-card">
+      <div class="avatar-section">
+        <div class="avatar-large">{{ authStore.userNickname.charAt(0).toUpperCase() }}</div>
+        <div class="basic-info">
+          <span class="nickname">{{ authStore.userNickname }}</span>
+          <span class="email">{{ authStore.userEmail }}</span>
+          <span class="join-date">注册于 {{ formatDate(authStore.user?.createdAt) }}</span>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- 修改昵称 -->
-      <section class="profile-section">
-        <h3>修改昵称</h3>
-        <div class="form-row">
-          <input v-model="nicknameForm" type="text" placeholder="输入新昵称" />
-          <button class="save-btn" :disabled="!nicknameForm.trim() || saving" @click="saveNickname">
-            {{ saving ? '保存中...' : '保存' }}
-          </button>
-        </div>
-      </section>
-
-      <!-- 修改密码 -->
-      <section class="profile-section">
-        <h3>修改密码</h3>
-        <div class="form-group">
-          <label>当前密码</label>
-          <input v-model="pwdForm.oldPassword" type="password" placeholder="输入当前密码" />
-        </div>
-        <div class="form-group">
-          <label>新密码</label>
-          <input v-model="pwdForm.newPassword" type="password" placeholder="至少 6 个字符" />
-        </div>
-        <div class="form-group">
-          <label>确认新密码</label>
-          <input v-model="pwdForm.confirmPassword" type="password" placeholder="再次输入新密码" />
-        </div>
-        <div v-if="pwdError" class="form-error">{{ pwdError }}</div>
-        <div v-if="pwdSuccess" class="form-success">{{ pwdSuccess }}</div>
-        <button class="save-btn" :disabled="!canChangePwd || saving" @click="savePassword">
-          {{ saving ? '保存中...' : '修改密码' }}
+    <section class="profile-section">
+      <h4>修改昵称</h4>
+      <div class="form-row">
+        <input v-model="nicknameForm" type="text" placeholder="输入新昵称" />
+        <button class="save-btn" :disabled="!nicknameForm.trim() || saving" @click="saveNickname">
+          {{ saving ? '保存中...' : '保存' }}
         </button>
-      </section>
+      </div>
+    </section>
 
-      <!-- 账户信息 -->
-      <section class="profile-section">
-        <h3>账户信息</h3>
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">用户 ID</span>
-            <span class="info-value">{{ authStore.user?.id }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">邮箱</span>
-            <span class="info-value">{{ authStore.userEmail }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">昵称</span>
-            <span class="info-value">{{ authStore.userNickname }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">注册时间</span>
-            <span class="info-value">{{ formatDate(authStore.user?.createdAt) }}</span>
-          </div>
+    <section class="profile-section">
+      <h4>修改密码</h4>
+      <div class="form-group">
+        <label>当前密码</label>
+        <input v-model="pwdForm.oldPassword" type="password" placeholder="输入当前密码" />
+      </div>
+      <div class="form-group">
+        <label>新密码</label>
+        <input v-model="pwdForm.newPassword" type="password" placeholder="至少 6 个字符" />
+      </div>
+      <div class="form-group">
+        <label>确认新密码</label>
+        <input v-model="pwdForm.confirmPassword" type="password" placeholder="再次输入新密码" />
+      </div>
+      <div v-if="pwdError" class="form-error">{{ pwdError }}</div>
+      <div v-if="pwdSuccess" class="form-success">{{ pwdSuccess }}</div>
+      <button class="save-btn" :disabled="!canChangePwd || saving" @click="savePassword">
+        {{ saving ? '保存中...' : '修改密码' }}
+      </button>
+    </section>
+
+    <section class="profile-section">
+      <h4>账户信息</h4>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">用户 ID</span>
+          <span class="info-value">{{ authStore.user?.id }}</span>
         </div>
-      </section>
-    </div>
+        <div class="info-item">
+          <span class="info-label">邮箱</span>
+          <span class="info-value">{{ authStore.userEmail }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">昵称</span>
+          <span class="info-value">{{ authStore.userNickname }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">注册时间</span>
+          <span class="info-value">{{ formatDate(authStore.user?.createdAt) }}</span>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -85,7 +76,6 @@ const authStore = useAuthStore();
 const saving = ref(false);
 const pwdError = ref('');
 const pwdSuccess = ref('');
-
 const nicknameForm = ref(authStore.userNickname);
 
 const pwdForm = reactive({
@@ -95,7 +85,7 @@ const pwdForm = reactive({
 });
 
 const canChangePwd = computed(
-  () => pwdForm.oldPassword && pwdForm.newPassword.length >= 6 && pwdForm.newPassword === pwdForm.confirmPassword
+  () => pwdForm.oldPassword && pwdForm.newPassword.length >= 6 && pwdForm.newPassword === pwdForm.confirmPassword,
 );
 
 async function saveNickname() {
@@ -151,50 +141,18 @@ function formatDate(ts?: number): string {
 </script>
 
 <style scoped>
-.profile-page {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-primary);
-}
-
-.profile-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-secondary);
-}
-
-.profile-header h2 {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.back-btn {
-  padding: 6px 12px;
-  border-radius: 6px;
-  color: var(--text-secondary);
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.back-btn:hover {
-  background: var(--bg-hover);
-  color: var(--accent);
-}
-
-.profile-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px 32px;
+.settings-panel {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-/* 头像卡片 */
+.panel-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
 .profile-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
@@ -243,7 +201,6 @@ function formatDate(ts?: number): string {
   color: var(--text-muted);
 }
 
-/* 修改区段 */
 .profile-section {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
@@ -251,7 +208,7 @@ function formatDate(ts?: number): string {
   padding: 20px 24px;
 }
 
-.profile-section h3 {
+.profile-section h4 {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 16px;
@@ -344,7 +301,6 @@ function formatDate(ts?: number): string {
   cursor: not-allowed;
 }
 
-/* 信息表格 */
 .info-grid {
   display: grid;
   grid-template-columns: 120px 1fr;
