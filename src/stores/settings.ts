@@ -4,6 +4,8 @@ import type { AppSettings, ModelProvider, ServiceProviderId } from '@/types';
 import { DEFAULT_PROVIDERS } from '@/utils/providers';
 import { defaultServiceTokens } from '@/utils/serviceProviders';
 import { loadStorageValue, saveStorageValue } from '@/utils/store';
+import { setAppLocale, DEFAULT_LOCALE } from '@/i18n';
+import type { AppLocale } from '@/types';
 
 const STORAGE_KEY = 'settings';
 
@@ -23,6 +25,7 @@ function mergeSettings(saved: AppSettings): AppSettings {
   return {
     ...saved,
     generationPrompt: saved.generationPrompt ?? '',
+    locale: saved.locale ?? DEFAULT_LOCALE,
     serviceTokens: { ...defaultServiceTokens(), ...saved.serviceTokens },
     providers: [...mergedProviders, ...customProviders],
   };
@@ -34,6 +37,7 @@ function defaultSettings(): AppSettings {
     activeProviderId: 'openai',
     activeModelId: 'gpt-4o',
     theme: 'dark',
+    locale: DEFAULT_LOCALE,
     fontSize: 14,
     sendOnEnter: true,
     systemPrompt: '',
@@ -60,6 +64,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const saved = await loadStorageValue<AppSettings | null>(STORAGE_KEY, null);
     settings.value = saved ? mergeSettings(saved) : defaultSettings();
     document.documentElement.setAttribute('data-theme', settings.value.theme);
+    setAppLocale(settings.value.locale);
     isHydrated.value = true;
   }
 
@@ -140,6 +145,12 @@ export const useSettingsStore = defineStore('settings', () => {
     save();
   }
 
+  function setLocale(locale: AppLocale) {
+    settings.value.locale = locale;
+    setAppLocale(locale);
+    save();
+  }
+
   function setSystemPrompt(prompt: string) {
     settings.value.systemPrompt = prompt;
     save();
@@ -186,6 +197,7 @@ export const useSettingsStore = defineStore('settings', () => {
     addModel,
     removeModel,
     setTheme,
+    setLocale,
     setSystemPrompt,
     setGenerationPrompt,
     setFontSize,

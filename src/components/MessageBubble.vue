@@ -7,7 +7,7 @@
       </div>
       <div class="message-body">
         <div class="message-header">
-          <span class="message-role">助手</span>
+          <span class="message-role">{{ t('message.assistant') }}</span>
           <span v-if="message.model" class="message-model">{{ message.model }}</span>
           <span class="message-time">{{ formatTime(message.timestamp) }}</span>
         </div>
@@ -23,12 +23,12 @@
               <div v-else class="markdown-body" v-html="renderedContent"></div>
             </div>
             <div v-if="showMessageActions" class="message-actions">
-              <button class="action-btn" :title="copied ? '已复制' : '复制'" @click="copyMessage">
+              <button class="action-btn" :title="copied ? t('common.copied') : t('common.copy')" @click="copyMessage">
                 {{ copied ? '✓' : '📋' }}
               </button>
-              <span class="action-btn action-btn-display" title="删除">🗑</span>
-              <span class="action-btn action-btn-display" title="点赞">👍</span>
-              <span class="action-btn action-btn-display" title="收藏">⭐</span>
+              <span class="action-btn action-btn-display" :title="t('message.delete')">🗑</span>
+              <span class="action-btn action-btn-display" :title="t('message.like')">👍</span>
+              <span class="action-btn action-btn-display" :title="t('message.favorite')">⭐</span>
             </div>
           </div>
           <PlanCard
@@ -49,7 +49,7 @@
       <div class="message-body">
         <div class="message-header is-right">
           <span class="message-time">{{ formatTime(message.timestamp) }}</span>
-          <span class="message-role">你</span>
+          <span class="message-role">{{ t('message.you') }}</span>
         </div>
         <div class="message-bubble-block is-right">
           <div class="message-bubble is-user">
@@ -59,12 +59,12 @@
             <div v-else class="message-text">{{ message.content }}</div>
           </div>
           <div v-if="showMessageActions" class="message-actions is-right">
-            <button class="action-btn" :title="copied ? '已复制' : '复制'" @click="copyMessage">
+            <button class="action-btn" :title="copied ? t('common.copied') : t('common.copy')" @click="copyMessage">
               {{ copied ? '✓' : '📋' }}
             </button>
-            <span class="action-btn action-btn-display" title="删除">🗑</span>
-            <span class="action-btn action-btn-display" title="点赞">👍</span>
-            <span class="action-btn action-btn-display" title="收藏">⭐</span>
+            <span class="action-btn action-btn-display" :title="t('message.delete')">🗑</span>
+            <span class="action-btn action-btn-display" :title="t('message.like')">👍</span>
+            <span class="action-btn action-btn-display" :title="t('message.favorite')">⭐</span>
           </div>
         </div>
       </div>
@@ -77,10 +77,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { ChatMessage, ProjectFile } from '@/types';
 import { renderMarkdown } from '@/utils/markdown';
 import PlanCard from '@/components/PlanCard.vue';
 import ProjectFiles from '@/components/ProjectFiles.vue';
+
+const { t, locale } = useI18n();
 
 const props = defineProps<{
   message: ChatMessage;
@@ -111,7 +114,7 @@ const showMessageActions = computed(
 
 function formatTime(ts: number): string {
   const d = new Date(ts);
-  return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' });
 }
 
 async function copyMessage() {

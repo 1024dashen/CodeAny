@@ -3,34 +3,34 @@
     <div class="auth-card">
       <div class="auth-logo">🤖</div>
       <h1 class="auth-title">CodeAny</h1>
-      <p class="auth-subtitle">登录你的账户</p>
+      <p class="auth-subtitle">{{ t('auth.loginTitle') }}</p>
 
       <form class="auth-form" @submit.prevent="handleLogin">
         <div class="form-group">
-          <label for="email">邮箱</label>
+          <label for="email">{{ t('auth.email') }}</label>
           <input
             id="email"
             v-model="email"
             type="email"
-            placeholder="请输入邮箱"
+            :placeholder="t('auth.emailPlaceholder')"
             autocomplete="email"
             required
           />
         </div>
 
         <div class="form-group">
-          <label for="password">密码</label>
+          <label for="password">{{ t('auth.password') }}</label>
           <div class="password-input">
             <input
               id="password"
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
-              placeholder="请输入密码"
+              :placeholder="t('auth.passwordPlaceholder')"
               autocomplete="current-password"
               required
             />
             <button type="button" class="toggle-pwd" @click="showPassword = !showPassword">
-              {{ showPassword ? '隐藏' : '显示' }}
+              {{ showPassword ? t('common.hide') : t('common.show') }}
             </button>
           </div>
         </div>
@@ -40,13 +40,13 @@
         </div>
 
         <button type="submit" class="auth-submit" :disabled="authStore.loading">
-          {{ authStore.loading ? '登录中...' : '登录' }}
+          {{ authStore.loading ? t('auth.loggingIn') : t('auth.login') }}
         </button>
       </form>
 
       <div class="auth-footer">
-        <span>还没有账户？</span>
-        <router-link to="/register" class="auth-link" @click="authStore.clearError()">注册账户</router-link>
+        <span>{{ t('auth.noAccount') }}</span>
+        <router-link to="/register" class="auth-link" @click="authStore.clearError()">{{ t('auth.registerLink') }}</router-link>
       </div>
     </div>
   </div>
@@ -55,8 +55,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const router = useRouter();
 

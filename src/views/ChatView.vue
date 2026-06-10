@@ -7,7 +7,7 @@
           <button
             class="collapse-btn"
             @click="sidebarCollapsed = !sidebarCollapsed"
-            :title="sidebarCollapsed ? '展开侧边栏' : '折叠侧边栏'"
+            :title="sidebarCollapsed ? t('chat.expandSidebar') : t('chat.collapseSidebar')"
           >
             {{ sidebarCollapsed ? '☰' : '◁' }}
           </button>
@@ -20,15 +20,15 @@
           <button
             class="workspace-btn"
             @click="workspaceStore.pickWorkspaceRoot()"
-            title="更改工作区目录"
+            :title="t('chat.changeWorkspace')"
           >
-            工作区
+            {{ t('chat.workspace') }}
           </button>
           <PreviewSelector v-if="chatStore.canPreview" />
           <button
             class="theme-btn"
             @click="settingsStore.setTheme(isDark ? 'light' : 'dark')"
-            :title="isDark ? '切换到浅色模式' : '切换到深色模式'"
+            :title="isDark ? t('chat.switchToLight') : t('chat.switchToDark')"
           >
             {{ isDark ? '☀' : '🌙' }}
           </button>
@@ -36,9 +36,9 @@
             v-if="chatStore.activeSession"
             class="clear-btn"
             @click="chatStore.clearMessages(chatStore.activeSessionId)"
-            title="清空对话"
+            :title="t('chat.clearChat')"
           >
-            🗑 清空
+            🗑 {{ t('chat.clearChat') }}
           </button>
         </div>
       </div>
@@ -47,7 +47,7 @@
         <div v-if="!chatStore.activeSession || chatStore.activeSession.messages.length === 0" class="empty-state">
           <div class="empty-icon">🎨</div>
           <h2>CodeAny</h2>
-          <p>描述你想要的应用，AI 将先生成计划，再生成 HTML 文件</p>
+          <p>{{ t('chat.emptyDesc') }}</p>
           <div class="quick-tips">
             <div class="tip" v-for="tip in tips" :key="tip" @click="quickSend(tip)">
               {{ tip }}
@@ -67,13 +67,13 @@
       </div>
 
       <div v-if="chatStore.isPlanRevisionMode" class="input-hint">
-        对计划不满意？在下方描述修改或补充内容，AI 将修订计划；满意后点击「确认并生成」
+        {{ t('chat.planRevisionHint') }}
       </div>
       <div
         v-else-if="!chatStore.canSendMessage && chatStore.activeSession"
         class="input-hint"
       >
-        请等待生成完成
+        {{ t('chat.waitGenerating') }}
       </div>
       <ChatInput />
     </div>
@@ -83,6 +83,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useChatStore } from '@/stores/chat';
 import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
@@ -94,6 +95,7 @@ import MessageBubble from '@/components/MessageBubble.vue';
 import ChatInput from '@/components/ChatInput.vue';
 import WorkspaceSetup from '@/components/WorkspaceSetup.vue';
 
+const { t } = useI18n();
 const chatStore = useChatStore();
 const settingsStore = useSettingsStore();
 const workspaceStore = useWorkspaceStore();
@@ -107,12 +109,12 @@ const shortWorkspacePath = computed(() => {
   return '...' + path.slice(-27);
 });
 
-const tips = [
-  '做一个响应式待办清单页面',
-  '生成一个深色主题的计算器',
-  '创建一个个人作品集展示页',
-  '做一个移动端友好的天气卡片 UI',
-];
+const tips = computed(() => [
+  t('chat.tips.todo'),
+  t('chat.tips.calculator'),
+  t('chat.tips.portfolio'),
+  t('chat.tips.weather'),
+]);
 
 function shouldShowPlanCard(msg: ChatMessage, index: number): boolean {
   const session = chatStore.activeSession;

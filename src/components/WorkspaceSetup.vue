@@ -2,9 +2,9 @@
   <div v-if="show" class="workspace-setup">
     <div class="setup-content">
       <div class="setup-icon">📂</div>
-      <h3>选择工作区根目录</h3>
-      <p>每个对话的应用文件将保存在该目录下的独立子文件夹中</p>
-      <button class="setup-btn" @click="handlePick">选择文件夹</button>
+      <h3>{{ t('workspace.title') }}</h3>
+      <p>{{ t('workspace.desc') }}</p>
+      <button class="setup-btn" @click="handlePick">{{ t('workspace.pickFolder') }}</button>
       <p v-if="workspaceStore.error" class="setup-error">{{ workspaceStore.error }}</p>
     </div>
   </div>
@@ -12,8 +12,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useWorkspaceStore } from '@/stores/workspace';
 
+const { t } = useI18n();
 const workspaceStore = useWorkspaceStore();
 
 const show = computed(

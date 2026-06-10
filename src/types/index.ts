@@ -50,6 +50,8 @@ export interface ProjectFile {
   content: string;
 }
 
+export type AppLocale = 'zh-CN' | 'en' | 'ja' | 'ko' | 'zh-TW';
+
 export type ServiceProviderId = 'github' | 'cloudflare' | 'netlify' | 'vercel';
 
 export interface ServiceTokens {
@@ -64,6 +66,7 @@ export interface AppSettings {
   activeProviderId: string;
   activeModelId: string;
   theme: 'light' | 'dark';
+  locale: AppLocale;
   fontSize: number;
   sendOnEnter: boolean;
   systemPrompt: string;

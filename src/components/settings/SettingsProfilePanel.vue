@@ -1,6 +1,6 @@
 <template>
   <div class="settings-panel">
-    <h3 class="panel-title">个人中心</h3>
+    <h3 class="panel-title">{{ t('profile.title') }}</h3>
 
     <section class="profile-card">
       <div class="avatar-section">
@@ -8,59 +8,59 @@
         <div class="basic-info">
           <span class="nickname">{{ authStore.userNickname }}</span>
           <span class="email">{{ authStore.userEmail }}</span>
-          <span class="join-date">注册于 {{ formatDate(authStore.user?.createdAt) }}</span>
+          <span class="join-date">{{ t('profile.joinedAt', { date: formatDate(authStore.user?.createdAt) }) }}</span>
         </div>
       </div>
     </section>
 
     <section class="profile-section">
-      <h4>修改昵称</h4>
+      <h4>{{ t('profile.changeNickname') }}</h4>
       <div class="form-row">
-        <input v-model="nicknameForm" type="text" placeholder="输入新昵称" />
+        <input v-model="nicknameForm" type="text" :placeholder="t('profile.nicknamePlaceholder')" />
         <button class="save-btn" :disabled="!nicknameForm.trim() || saving" @click="saveNickname">
-          {{ saving ? '保存中...' : '保存' }}
+          {{ saving ? t('common.saving') : t('common.save') }}
         </button>
       </div>
     </section>
 
     <section class="profile-section">
-      <h4>修改密码</h4>
+      <h4>{{ t('profile.changePassword') }}</h4>
       <div class="form-group">
-        <label>当前密码</label>
-        <input v-model="pwdForm.oldPassword" type="password" placeholder="输入当前密码" />
+        <label>{{ t('profile.currentPassword') }}</label>
+        <input v-model="pwdForm.oldPassword" type="password" :placeholder="t('profile.currentPasswordPlaceholder')" />
       </div>
       <div class="form-group">
-        <label>新密码</label>
-        <input v-model="pwdForm.newPassword" type="password" placeholder="至少 6 个字符" />
+        <label>{{ t('profile.newPassword') }}</label>
+        <input v-model="pwdForm.newPassword" type="password" :placeholder="t('profile.newPasswordPlaceholder')" />
       </div>
       <div class="form-group">
-        <label>确认新密码</label>
-        <input v-model="pwdForm.confirmPassword" type="password" placeholder="再次输入新密码" />
+        <label>{{ t('profile.confirmNewPassword') }}</label>
+        <input v-model="pwdForm.confirmPassword" type="password" :placeholder="t('profile.confirmNewPasswordPlaceholder')" />
       </div>
       <div v-if="pwdError" class="form-error">{{ pwdError }}</div>
       <div v-if="pwdSuccess" class="form-success">{{ pwdSuccess }}</div>
       <button class="save-btn" :disabled="!canChangePwd || saving" @click="savePassword">
-        {{ saving ? '保存中...' : '修改密码' }}
+        {{ saving ? t('common.saving') : t('profile.changePasswordBtn') }}
       </button>
     </section>
 
     <section class="profile-section">
-      <h4>账户信息</h4>
+      <h4>{{ t('profile.accountInfo') }}</h4>
       <div class="info-grid">
         <div class="info-item">
-          <span class="info-label">用户 ID</span>
+          <span class="info-label">{{ t('profile.userId') }}</span>
           <span class="info-value">{{ authStore.user?.id }}</span>
         </div>
         <div class="info-item">
-          <span class="info-label">邮箱</span>
+          <span class="info-label">{{ t('profile.email') }}</span>
           <span class="info-value">{{ authStore.userEmail }}</span>
         </div>
         <div class="info-item">
-          <span class="info-label">昵称</span>
+          <span class="info-label">{{ t('profile.nickname') }}</span>
           <span class="info-value">{{ authStore.userNickname }}</span>
         </div>
         <div class="info-item">
-          <span class="info-label">注册时间</span>
+          <span class="info-label">{{ t('profile.registeredAt') }}</span>
           <span class="info-value">{{ formatDate(authStore.user?.createdAt) }}</span>
         </div>
       </div>
@@ -70,8 +70,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 
+const { t, locale } = useI18n();
 const authStore = useAuthStore();
 const saving = ref(false);
 const pwdError = ref('');
@@ -105,24 +107,24 @@ async function savePassword() {
   pwdSuccess.value = '';
 
   if (pwdForm.newPassword !== pwdForm.confirmPassword) {
-    pwdError.value = '两次输入的新密码不一致';
+    pwdError.value = t('profile.passwordMismatch');
     return;
   }
 
   if (pwdForm.newPassword.length < 6) {
-    pwdError.value = '新密码至少需要 6 个字符';
+    pwdError.value = t('profile.passwordMin');
     return;
   }
 
   saving.value = true;
   try {
     await authStore.changePassword(pwdForm.oldPassword, pwdForm.newPassword);
-    pwdSuccess.value = '密码修改成功';
+    pwdSuccess.value = t('profile.passwordChanged');
     pwdForm.oldPassword = '';
     pwdForm.newPassword = '';
     pwdForm.confirmPassword = '';
   } catch (err: unknown) {
-    pwdError.value = err instanceof Error ? err.message : '密码修改失败';
+    pwdError.value = err instanceof Error ? err.message : t('profile.passwordChangeFailed');
   } finally {
     saving.value = false;
   }
@@ -130,7 +132,7 @@ async function savePassword() {
 
 function formatDate(ts?: number): string {
   if (!ts) return '-';
-  return new Date(ts).toLocaleDateString('zh-CN', {
+  return new Date(ts).toLocaleDateString(locale.value, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

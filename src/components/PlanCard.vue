@@ -2,22 +2,26 @@
   <div class="plan-card">
     <div class="plan-card-header">
       <span class="plan-icon">📋</span>
-      <span class="plan-title">开发计划已就绪</span>
+      <span class="plan-title">{{ t('plan.title') }}</span>
     </div>
     <p class="plan-hint">
-      确认后将按计划生成项目文件并保存到本地工作区。也可在下方输入修改意见，让 AI 重新修订计划。
+      {{ t('plan.hint') }}
     </p>
     <button
       class="confirm-btn"
       :disabled="disabled"
       @click="$emit('confirm')"
     >
-      {{ disabled ? '生成中...' : '确认并生成' }}
+      {{ disabled ? t('plan.generating') : t('plan.confirm') }}
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
 defineProps<{
   disabled?: boolean;
 }>();

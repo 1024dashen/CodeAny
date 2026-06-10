@@ -17,8 +17,8 @@
           >
             <span class="item-check">{{ provider.id === settingsStore.settings.activeProviderId ? '✓' : '' }}</span>
             <span class="item-name">{{ provider.name }}</span>
-            <span v-if="provider.apiKey" class="item-badge connected">已连接</span>
-            <span v-else class="item-badge">未配置</span>
+            <span v-if="provider.apiKey" class="item-badge connected">{{ t('modelSelector.connected') }}</span>
+            <span v-else class="item-badge">{{ t('modelSelector.notConfigured') }}</span>
           </div>
         </div>
       </Transition>
@@ -43,7 +43,7 @@
             <span class="item-name">{{ model.name }}</span>
           </div>
           <div v-if="currentModels.length === 0" class="dropdown-empty">
-            暂无可用模型
+            {{ t('modelSelector.noModels') }}
           </div>
         </div>
       </Transition>
@@ -53,18 +53,20 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings';
 
+const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const showProviderMenu = ref(false);
 const showModelMenu = ref(false);
 
 const activeProviderName = computed(() => {
-  return settingsStore.activeProvider?.name || '选择提供商';
+  return settingsStore.activeProvider?.name || t('modelSelector.selectProvider');
 });
 
 const activeModelName = computed(() => {
-  return settingsStore.activeModel?.name || '选择模型';
+  return settingsStore.activeModel?.name || t('modelSelector.selectModel');
 });
 
 const currentModels = computed(() => {

@@ -1,7 +1,7 @@
 <template>
   <div class="settings-panel">
-    <h3 class="panel-title">拓展配置</h3>
-    <p class="panel-desc">配置第三方服务商 Token，供后续部署、托管、DNS 等操作调用对应 API。</p>
+    <h3 class="panel-title">{{ t('extension.title') }}</h3>
+    <p class="panel-desc">{{ t('extension.desc') }}</p>
 
     <section
       v-for="provider in SERVICE_PROVIDERS"
@@ -15,7 +15,7 @@
             class="provider-status"
             :class="{ configured: hasToken(provider.id) }"
           >
-            {{ hasToken(provider.id) ? '已配置' : '未配置' }}
+            {{ hasToken(provider.id) ? t('common.configured') : t('common.notConfigured') }}
           </span>
         </div>
         <a
@@ -24,11 +24,11 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          获取 Token →
+          {{ t('common.getToken') }}
         </a>
       </div>
 
-      <p class="provider-desc">{{ provider.description }}</p>
+      <p class="provider-desc">{{ t(`extension.providers.${provider.id}.desc`) }}</p>
 
       <div class="token-row">
         <div class="token-input">
@@ -39,7 +39,7 @@
             @change="settingsStore.setServiceToken(provider.id, ($event.target as HTMLInputElement).value)"
           />
           <button class="toggle-key" @click="toggleKey(provider.id)">
-            {{ showKeys[provider.id] ? '隐藏' : '显示' }}
+            {{ showKeys[provider.id] ? t('common.hide') : t('common.show') }}
           </button>
         </div>
         <button
@@ -47,7 +47,7 @@
           class="clear-btn"
           @click="clearToken(provider.id, provider.name)"
         >
-          清除
+          {{ t('common.clear') }}
         </button>
       </div>
     </section>
@@ -56,10 +56,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings';
 import { SERVICE_PROVIDERS } from '@/utils/serviceProviders';
 import type { ServiceProviderId } from '@/types';
 
+const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const showKeys = ref<Record<string, boolean>>({});
 
@@ -72,7 +74,7 @@ function toggleKey(providerId: ServiceProviderId) {
 }
 
 function clearToken(providerId: ServiceProviderId, providerName: string) {
-  if (confirm(`确定要清除 ${providerName} Token 吗？`)) {
+  if (confirm(t('extension.clearConfirm', { name: providerName }))) {
     settingsStore.clearServiceToken(providerId);
   }
 }

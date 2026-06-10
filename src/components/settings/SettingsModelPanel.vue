@@ -1,31 +1,31 @@
 <template>
   <div class="settings-panel">
-    <h3 class="panel-title">大模型配置</h3>
+    <h3 class="panel-title">{{ t('model.title') }}</h3>
 
     <section class="settings-section">
-      <h4>HTML 生成提示词</h4>
+      <h4>{{ t('model.generationPrompt') }}</h4>
       <textarea
         class="system-prompt-input"
         :value="settingsStore.settings.generationPrompt"
         @input="settingsStore.setGenerationPrompt(($event.target as HTMLTextAreaElement).value)"
-        placeholder="设置 HTML 文件生成时的额外要求（可选）"
+        :placeholder="t('model.generationPlaceholder')"
         rows="3"
       />
     </section>
 
     <section class="settings-section">
-      <h4>系统提示词</h4>
+      <h4>{{ t('model.systemPrompt') }}</h4>
       <textarea
         class="system-prompt-input"
         :value="settingsStore.settings.systemPrompt"
         @input="settingsStore.setSystemPrompt(($event.target as HTMLTextAreaElement).value)"
-        placeholder="设置全局系统提示词（可选）"
+        :placeholder="t('model.systemPlaceholder')"
         rows="3"
       />
     </section>
 
     <section class="settings-section">
-      <h4>模型提供商</h4>
+      <h4>{{ t('model.providers') }}</h4>
       <div
         v-for="provider in settingsStore.allProviders"
         :key="provider.id"
@@ -35,7 +35,7 @@
           <span class="provider-name">{{ provider.name }}</span>
           <div class="provider-header-right">
             <span class="provider-id">{{ provider.id }}</span>
-            <button class="provider-delete" @click="removeProvider(provider.id, provider.name)" title="删除提供商">删除</button>
+            <button class="provider-delete" @click="removeProvider(provider.id, provider.name)" :title="t('model.deleteProvider')">{{ t('model.delete') }}</button>
           </div>
         </div>
         <div class="provider-body">
@@ -55,28 +55,28 @@
                 :type="showKeys[provider.id] ? 'text' : 'password'"
                 :value="provider.apiKey"
                 @change="settingsStore.updateApiKey(provider.id, ($event.target as HTMLInputElement).value)"
-                placeholder="输入 API Key"
+                :placeholder="t('model.apiKeyPlaceholder')"
               />
               <button class="toggle-key" @click="toggleKey(provider.id)">
-                {{ showKeys[provider.id] ? '隐藏' : '显示' }}
+                {{ showKeys[provider.id] ? t('common.hide') : t('common.show') }}
               </button>
             </div>
           </div>
           <div class="provider-models">
-            <span class="models-label">可用模型:</span>
+            <span class="models-label">{{ t('model.availableModels') }}</span>
             <div
               v-for="model in provider.models"
               :key="model.id"
               class="model-tag"
             >
               <span>{{ model.name }}</span>
-              <button class="model-remove" @click="settingsStore.removeModel(provider.id, model.id)" title="移除模型">✕</button>
+              <button class="model-remove" @click="settingsStore.removeModel(provider.id, model.id)" :title="t('model.removeModel')">✕</button>
             </div>
             <div class="add-model-row">
               <input
                 v-model="newModelIds[provider.id]"
                 class="add-model-input"
-                placeholder="模型 ID"
+                :placeholder="t('model.modelId')"
                 @keydown.enter="addModel(provider.id)"
               />
               <button class="add-model-btn" @click="addModel(provider.id)">+</button>
@@ -87,25 +87,25 @@
     </section>
 
     <section class="settings-section">
-      <h4>添加自定义提供商 (OpenAI 兼容)</h4>
+      <h4>{{ t('model.addProvider') }}</h4>
       <div class="add-provider-form">
         <div class="setting-row">
-          <label>名称</label>
-          <input v-model="newProvider.name" placeholder="提供商名称" />
+          <label>{{ t('model.name') }}</label>
+          <input v-model="newProvider.name" :placeholder="t('model.namePlaceholder')" />
         </div>
         <div class="setting-row">
           <label>API Base</label>
-          <input v-model="newProvider.apiBase" placeholder="https://api.example.com/v1" />
+          <input v-model="newProvider.apiBase" :placeholder="t('model.apiBasePlaceholder')" />
         </div>
         <div class="setting-row">
           <label>API Key</label>
           <input v-model="newProvider.apiKey" type="password" placeholder="API Key" />
         </div>
         <div class="setting-row">
-          <label>模型 ID</label>
-          <input v-model="newProvider.modelId" placeholder="model-id (逗号分隔多个)" />
+          <label>{{ t('model.modelId') }}</label>
+          <input v-model="newProvider.modelId" :placeholder="t('model.modelIdPlaceholder')" />
         </div>
-        <button class="add-btn" @click="addCustomProvider">添加提供商</button>
+        <button class="add-btn" @click="addCustomProvider">{{ t('model.addProviderBtn') }}</button>
       </div>
     </section>
   </div>
@@ -113,8 +113,10 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings';
 
+const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const showKeys = ref<Record<string, boolean>>({});
 const newModelIds = reactive<Record<string, string>>({});
@@ -138,7 +140,7 @@ function addModel(providerId: string) {
 }
 
 function removeProvider(providerId: string, providerName: string) {
-  if (confirm(`确定要删除提供商「${providerName}」吗？删除后不可恢复。`)) {
+  if (confirm(t('model.deleteProviderConfirm', { name: providerName }))) {
     settingsStore.removeProvider(providerId);
   }
 }

@@ -9,6 +9,7 @@ import {
   updateProfile as authUpdateProfile,
   changePassword as authChangePassword,
 } from '@/utils/auth';
+import { t } from '@/i18n';
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
@@ -39,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = result.user;
       return result;
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '登录失败';
+      const msg = err instanceof Error ? err.message : t('auth.loginFailed');
       error.value = msg;
       throw err;
     } finally {
@@ -55,7 +56,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = result.user;
       return result;
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '注册失败';
+      const msg = err instanceof Error ? err.message : t('auth.registerFailed');
       error.value = msg;
       throw err;
     } finally {

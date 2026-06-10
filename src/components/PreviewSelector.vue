@@ -1,6 +1,6 @@
 <template>
   <div class="preview-selector">
-    <span class="preview-label">预览</span>
+    <span class="preview-label">{{ t('preview.label') }}</span>
     <div class="preview-modes">
       <button
         v-for="mode in previewModes"
@@ -30,20 +30,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useChatStore } from '@/stores/chat';
 import { openProjectPreview, type PreviewMode } from '@/utils/preview';
 
+const { t } = useI18n();
 const chatStore = useChatStore();
 const loading = ref(false);
 const activeMode = ref<PreviewMode | null>(null);
 
-const previewModes: Array<{ id: PreviewMode; label: string; shortLabel: string }> = [
-  { id: 'phone', label: '手机预览 (390×844)', shortLabel: '手机' },
-  { id: 'ipad', label: 'iPad 预览 (820×1180)', shortLabel: 'iPad' },
-  { id: 'desktop', label: '桌面预览 (1280×800)', shortLabel: '桌面' },
-  { id: 'browser', label: '在默认浏览器中打开', shortLabel: '网站' },
-];
+const previewModes = computed(() => [
+  { id: 'phone' as PreviewMode, label: t('preview.phoneTitle'), shortLabel: t('preview.phone') },
+  { id: 'ipad' as PreviewMode, label: t('preview.ipadTitle'), shortLabel: t('preview.ipad') },
+  { id: 'desktop' as PreviewMode, label: t('preview.desktopTitle'), shortLabel: t('preview.desktop') },
+  { id: 'browser' as PreviewMode, label: t('preview.browserTitle'), shortLabel: t('preview.browser') },
+]);
 
 async function handlePreview(mode: PreviewMode) {
   const session = chatStore.activeSession;
@@ -54,7 +56,7 @@ async function handlePreview(mode: PreviewMode) {
     await openProjectPreview(mode, session.id, session.title, session.projectDir);
     activeMode.value = mode;
   } catch (err) {
-    const message = err instanceof Error ? err.message : '预览启动失败';
+    const message = err instanceof Error ? err.message : t('preview.failed');
     alert(message);
   } finally {
     loading.value = false;

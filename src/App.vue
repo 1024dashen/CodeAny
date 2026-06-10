@@ -1,6 +1,6 @@
 <template>
   <router-view v-if="isReady" />
-  <div v-else class="app-loading">加载中...</div>
+  <div v-else class="app-loading">{{ $t('common.loading') }}</div>
 </template>
 
 <script setup lang="ts">

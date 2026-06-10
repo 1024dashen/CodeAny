@@ -2,7 +2,7 @@
   <div class="project-files">
     <div class="files-header">
       <span class="files-icon">📁</span>
-      <span class="files-title">已生成 {{ files.length }} 个文件</span>
+      <span class="files-title">{{ t('project.filesGenerated', { count: files.length }) }}</span>
     </div>
     <ul class="files-list">
       <li
@@ -21,7 +21,10 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { ProjectFile } from '@/types';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   files: ProjectFile[];

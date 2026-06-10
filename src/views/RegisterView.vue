@@ -3,56 +3,56 @@
     <div class="auth-card">
       <div class="auth-logo">🤖</div>
       <h1 class="auth-title">CodeAny</h1>
-      <p class="auth-subtitle">创建新账户</p>
+      <p class="auth-subtitle">{{ t('auth.registerTitle') }}</p>
 
       <form class="auth-form" @submit.prevent="handleRegister">
         <div class="form-group">
-          <label for="email">邮箱</label>
+          <label for="email">{{ t('auth.email') }}</label>
           <input
             id="email"
             v-model="email"
             type="email"
-            placeholder="请输入邮箱"
+            :placeholder="t('auth.emailPlaceholder')"
             autocomplete="email"
             required
           />
         </div>
 
         <div class="form-group">
-          <label for="nickname">昵称（可选）</label>
+          <label for="nickname">{{ t('auth.nickname') }}</label>
           <input
             id="nickname"
             v-model="nickname"
             type="text"
-            placeholder="给自己取个名字"
+            :placeholder="t('auth.nicknamePlaceholder')"
             autocomplete="nickname"
           />
         </div>
 
         <div class="form-group">
-          <label for="password">密码</label>
+          <label for="password">{{ t('auth.password') }}</label>
           <div class="password-input">
             <input
               id="password"
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
-              placeholder="至少 6 个字符"
+              :placeholder="t('auth.passwordMinPlaceholder')"
               autocomplete="new-password"
               required
             />
             <button type="button" class="toggle-pwd" @click="showPassword = !showPassword">
-              {{ showPassword ? '隐藏' : '显示' }}
+              {{ showPassword ? t('common.hide') : t('common.show') }}
             </button>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="confirmPassword">确认密码</label>
+          <label for="confirmPassword">{{ t('auth.confirmPassword') }}</label>
           <input
             id="confirmPassword"
             v-model="confirmPassword"
             :type="showPassword ? 'text' : 'password'"
-            placeholder="再次输入密码"
+            :placeholder="t('auth.confirmPasswordPlaceholder')"
             autocomplete="new-password"
             required
           />
@@ -63,13 +63,13 @@
         </div>
 
         <button type="submit" class="auth-submit" :disabled="authStore.loading">
-          {{ authStore.loading ? '注册中...' : '注册' }}
+          {{ authStore.loading ? t('auth.registering') : t('auth.register') }}
         </button>
       </form>
 
       <div class="auth-footer">
-        <span>已有账户？</span>
-        <router-link to="/login" class="auth-link" @click="authStore.clearError()">立即登录</router-link>
+        <span>{{ t('auth.hasAccount') }}</span>
+        <router-link to="/login" class="auth-link" @click="authStore.clearError()">{{ t('auth.loginLink') }}</router-link>
       </div>
     </div>
   </div>
@@ -78,8 +78,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const router = useRouter();
 

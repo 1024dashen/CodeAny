@@ -3,6 +3,7 @@ import { LogicalSize } from '@tauri-apps/api/dpi';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { open } from '@tauri-apps/plugin-shell';
 import { isTauriEnv } from '@/utils/store';
+import { t } from '@/i18n';
 
 export type PreviewMode = 'phone' | 'ipad' | 'desktop' | 'browser';
 
@@ -56,7 +57,7 @@ async function openPreviewWindow(
 
   const previewWin = new WebviewWindow(label, {
     url,
-    title: `预览 - ${sessionTitle}`,
+    title: t('preview.windowTitle', { title: sessionTitle }),
     width,
     height,
     center: true,
@@ -75,7 +76,7 @@ export async function openProjectPreview(
   projectDir: string,
 ): Promise<void> {
   if (!isTauriEnv()) {
-    throw new Error('预览功能仅在 Tauri 桌面应用中可用');
+    throw new Error(t('preview.tauriOnly'));
   }
 
   const port = await ensurePreviewServer(sessionId, projectDir);

@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { loadWorkspaceRoot, saveWorkspaceRoot, isTauriEnv } from '@/utils/store';
+import { t } from '@/i18n';
 
 export const useWorkspaceStore = defineStore('workspace', () => {
   const workspaceRoot = ref('');
@@ -16,14 +17,14 @@ export const useWorkspaceStore = defineStore('workspace', () => {
 
   async function pickWorkspaceRoot(): Promise<string | null> {
     if (!isTauriEnv()) {
-      error.value = '请在 Tauri 桌面应用中运行以选择工作区目录';
+      error.value = t('workspace.tauriOnly');
       return null;
     }
 
     const selected = await open({
       directory: true,
       multiple: false,
-      title: '选择工作区根目录',
+      title: t('workspace.dialogTitle'),
     });
 
     if (!selected) return null;

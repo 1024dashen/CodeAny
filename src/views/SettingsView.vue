@@ -1,8 +1,8 @@
 <template>
   <div class="settings-page">
     <div class="settings-header">
-      <button class="back-btn" @click="$router.push('/')">← 返回</button>
-      <h2>系统设置</h2>
+      <button class="back-btn" @click="$router.push('/')">← {{ t('common.back') }}</button>
+      <h2>{{ t('settings.title') }}</h2>
     </div>
 
     <div class="settings-layout">
@@ -30,8 +30,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import SettingsProfilePanel from '@/components/settings/SettingsProfilePanel.vue';
 import SettingsModelPanel from '@/components/settings/SettingsModelPanel.vue';
 import SettingsEditorPanel from '@/components/settings/SettingsEditorPanel.vue';
@@ -39,18 +40,19 @@ import SettingsExtensionPanel from '@/components/settings/SettingsExtensionPanel
 
 type SettingsTab = 'profile' | 'model' | 'editor' | 'extension';
 
-const menuItems: { id: SettingsTab; label: string; icon: string }[] = [
-  { id: 'profile', label: '个人中心', icon: '👤' },
-  { id: 'model', label: '大模型配置', icon: '🤖' },
-  { id: 'editor', label: '编辑器设置', icon: '📝' },
-  { id: 'extension', label: '拓展配置', icon: '🧩' },
-];
-
-const validTabs = new Set<SettingsTab>(menuItems.map(item => item.id));
-
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const activeTab = ref<SettingsTab>('profile');
+
+const menuItems = computed(() => [
+  { id: 'profile' as SettingsTab, label: t('settings.tabs.profile'), icon: '👤' },
+  { id: 'model' as SettingsTab, label: t('settings.tabs.model'), icon: '🤖' },
+  { id: 'editor' as SettingsTab, label: t('settings.tabs.editor'), icon: '📝' },
+  { id: 'extension' as SettingsTab, label: t('settings.tabs.extension'), icon: '🧩' },
+]);
+
+const validTabs = new Set<SettingsTab>(['profile', 'model', 'editor', 'extension']);
 
 function resolveTab(tab: unknown): SettingsTab {
   return typeof tab === 'string' && validTabs.has(tab as SettingsTab)

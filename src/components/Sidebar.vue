@@ -1,9 +1,9 @@
 <template>
   <div class="sidebar" :class="{ collapsed }">
     <div class="sidebar-header">
-      <button class="new-chat-btn" @click="handleNewSession" :title="collapsed ? '新应用' : ''">
+      <button class="new-chat-btn" @click="handleNewSession" :title="collapsed ? t('sidebar.newApp') : ''">
         <span class="icon">+</span>
-        <span v-if="!collapsed" class="btn-text">新应用</span>
+        <span v-if="!collapsed" class="btn-text">{{ t('sidebar.newApp') }}</span>
       </button>
     </div>
 
@@ -20,7 +20,7 @@
           <span class="session-icon" :class="{ 'icon-collapsed': collapsed }">{{ getSessionIcon(session) }}</span>
           <span v-if="!collapsed" class="session-title">{{ session.title }}</span>
         </div>
-        <button v-if="!collapsed" class="session-delete" @click.stop="chatStore.deleteSession(session.id)" title="删除对话">
+        <button v-if="!collapsed" class="session-delete" @click.stop="chatStore.deleteSession(session.id)" :title="t('sidebar.deleteSession')">
           ✕
         </button>
       </div>
@@ -43,34 +43,34 @@
           <div v-if="showUserMenu" class="user-dropdown" :class="{ 'dropdown-collapsed': collapsed }">
             <button class="dropdown-item" @click="goProfile">
               <span class="dropdown-icon">👤</span>
-              <span v-if="collapsed">个人</span>
-              <span v-else>个人中心</span>
+              <span v-if="collapsed">{{ t('sidebar.profileShort') }}</span>
+              <span v-else>{{ t('sidebar.profile') }}</span>
             </button>
             <button class="dropdown-item" @click="goSettings">
               <span class="dropdown-icon">⚙</span>
-              <span v-if="collapsed">设置</span>
-              <span v-else>系统设置</span>
+              <span v-if="collapsed">{{ t('sidebar.settingsShort') }}</span>
+              <span v-else>{{ t('sidebar.settings') }}</span>
             </button>
             <button class="dropdown-item" @click="toggleTheme">
               <span class="dropdown-icon">{{ isDark ? '☀' : '🌙' }}</span>
-              <span v-if="collapsed">{{ isDark ? '浅色' : '深色' }}</span>
-              <span v-else>{{ isDark ? '浅色模式' : '深色模式' }}</span>
+              <span v-if="collapsed">{{ isDark ? t('sidebar.lightShort') : t('sidebar.darkShort') }}</span>
+              <span v-else>{{ isDark ? t('sidebar.lightMode') : t('sidebar.darkMode') }}</span>
             </button>
             <button class="dropdown-item" @click="openHelp">
               <span class="dropdown-icon">📖</span>
-              <span v-if="collapsed">帮助</span>
-              <span v-else>帮助文档</span>
+              <span v-if="collapsed">{{ t('sidebar.helpShort') }}</span>
+              <span v-else>{{ t('sidebar.help') }}</span>
             </button>
             <button class="dropdown-item" @click="openAbout">
               <span class="dropdown-icon">ℹ️</span>
-              <span v-if="collapsed">关于</span>
-              <span v-else>关于我们</span>
+              <span v-if="collapsed">{{ t('sidebar.aboutShort') }}</span>
+              <span v-else>{{ t('sidebar.about') }}</span>
             </button>
             <div class="dropdown-divider"></div>
             <button class="dropdown-item danger" @click="handleLogout">
               <span class="dropdown-icon">⏻</span>
-              <span v-if="collapsed">退出</span>
-              <span v-else>退出登录</span>
+              <span v-if="collapsed">{{ t('sidebar.logoutShort') }}</span>
+              <span v-else>{{ t('sidebar.logout') }}</span>
             </button>
           </div>
         </Transition>
@@ -86,12 +86,14 @@ import { useAuthStore } from '@/stores/auth';
 import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { getSessionIcon } from '@/utils/sessionIcon';
 
 defineProps<{
   collapsed: boolean;
 }>();
 
+const { t } = useI18n();
 const chatStore = useChatStore();
 const authStore = useAuthStore();
 const settingsStore = useSettingsStore();
@@ -136,7 +138,7 @@ function openHelp() {
 
 function openAbout() {
   closeUserMenu();
-  alert('CodeAny v0.1.0\nAI 智能对话助手，支持多种大语言模型');
+  alert(t('sidebar.aboutMessage'));
 }
 
 async function handleLogout() {

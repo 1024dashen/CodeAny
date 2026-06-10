@@ -19,6 +19,7 @@ import {
 import { writeProjectFilesToDisk } from '@/utils/preview';
 import { applyGeneratedAppDefaults } from '@/utils/generatedAppDefaults';
 import { ensureSessionIcon, pickRandomAppIcon } from '@/utils/sessionIcon';
+import { t } from '@/i18n';
 
 const STORAGE_KEY = 'sessions';
 
@@ -32,7 +33,7 @@ function defaultSession(
 ): ChatSession {
   return {
     id: generateId(),
-    title: '新应用',
+    title: t('sidebar.newApp'),
     messages: [],
     modelId: settings.activeModelId,
     providerId: settings.activeProviderId,
@@ -476,7 +477,7 @@ export const useChatStore = defineStore('chat', () => {
     const session = sessions.value.find(s => s.id === sessionId);
     if (session) {
       session.messages = [];
-      session.title = '新应用';
+      session.title = t('sidebar.newApp');
       session.generationPhase = 'idle';
       session.planContent = undefined;
       session.projectFiles = undefined;

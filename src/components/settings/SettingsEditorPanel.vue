@@ -1,37 +1,48 @@
 <template>
   <div class="settings-panel">
-    <h3 class="panel-title">编辑器设置</h3>
+    <h3 class="panel-title">{{ t('editor.title') }}</h3>
 
     <section class="settings-section">
-      <h4>外观</h4>
+      <h4>{{ t('editor.appearance') }}</h4>
       <div class="setting-row">
-        <label>主题</label>
+        <label>{{ t('editor.theme') }}</label>
         <select :value="settingsStore.settings.theme" @change="settingsStore.setTheme(($event.target as HTMLSelectElement).value as 'light' | 'dark')">
-          <option value="dark">深色</option>
-          <option value="light">浅色</option>
+          <option value="dark">{{ t('editor.themeDark') }}</option>
+          <option value="light">{{ t('editor.themeLight') }}</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>{{ t('lang.label') }}</label>
+        <select
+          :value="settingsStore.settings.locale"
+          @change="settingsStore.setLocale(($event.target as HTMLSelectElement).value as AppLocale)"
+        >
+          <option v-for="loc in SUPPORTED_LOCALES" :key="loc" :value="loc">
+            {{ t(`lang.${loc}`) }}
+          </option>
         </select>
       </div>
     </section>
 
     <section class="settings-section">
-      <h4>工作区</h4>
+      <h4>{{ t('editor.workspace') }}</h4>
       <div class="setting-row">
-        <label>根目录</label>
+        <label>{{ t('editor.rootDir') }}</label>
         <input
           type="text"
           :value="workspaceStore.workspaceRoot"
           readonly
-          placeholder="尚未选择工作区目录"
+          :placeholder="t('editor.noWorkspace')"
         />
       </div>
-      <button class="add-btn" @click="workspaceStore.pickWorkspaceRoot()">更改目录</button>
-      <p class="section-hint">每个对话的应用文件将保存在该目录下的独立子文件夹中</p>
+      <button class="add-btn" @click="workspaceStore.pickWorkspaceRoot()">{{ t('editor.changeDir') }}</button>
+      <p class="section-hint">{{ t('editor.workspaceHint') }}</p>
     </section>
 
     <section class="settings-section">
-      <h4>输入行为</h4>
+      <h4>{{ t('editor.inputBehavior') }}</h4>
       <div class="setting-row">
-        <label>字体大小</label>
+        <label>{{ t('editor.fontSize') }}</label>
         <select
           :value="settingsStore.settings.fontSize"
           @change="settingsStore.setFontSize(Number(($event.target as HTMLSelectElement).value))"
@@ -43,7 +54,7 @@
         </select>
       </div>
       <div class="setting-row checkbox-row">
-        <label>Enter 发送消息</label>
+        <label>{{ t('editor.enterSend') }}</label>
         <label class="toggle-switch">
           <input
             type="checkbox"
@@ -54,16 +65,20 @@
         </label>
       </div>
       <p class="section-hint">
-        {{ settingsStore.settings.sendOnEnter ? '按 Enter 发送，Shift+Enter 换行' : '按 Enter 换行，需点击按钮发送' }}
+        {{ settingsStore.settings.sendOnEnter ? t('editor.enterSendHint') : t('editor.enterNewlineHint') }}
       </p>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
+import { SUPPORTED_LOCALES } from '@/i18n';
+import type { AppLocale } from '@/types';
 
+const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const workspaceStore = useWorkspaceStore();
 </script>
