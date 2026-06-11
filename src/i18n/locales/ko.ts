@@ -71,7 +71,7 @@ export default {
     desktop: '데스크톱',
     browser: '웹',
     phoneTitle: '휴대폰 미리보기 (390×844)',
-    ipadTitle: 'iPad 미리보기 (820×1180)',
+    ipadTitle: 'iPad 미리보기 (1180×820)',
     desktopTitle: '데스크톱 미리보기 (1280×800)',
     browserTitle: '기본 브라우저에서 열기',
     failed: '미리보기 시작 실패',

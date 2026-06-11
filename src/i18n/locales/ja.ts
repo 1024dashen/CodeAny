@@ -71,7 +71,7 @@ export default {
     desktop: 'デスクトップ',
     browser: 'Web',
     phoneTitle: 'スマホプレビュー (390×844)',
-    ipadTitle: 'iPad プレビュー (820×1180)',
+    ipadTitle: 'iPad プレビュー (1180×820)',
     desktopTitle: 'デスクトッププレビュー (1280×800)',
     browserTitle: 'デフォルトブラウザで開く',
     failed: 'プレビューの起動に失敗しました',

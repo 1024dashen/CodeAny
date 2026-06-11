@@ -71,7 +71,7 @@ export default {
     desktop: 'Desktop',
     browser: 'Web',
     phoneTitle: 'Phone preview (390×844)',
-    ipadTitle: 'iPad preview (820×1180)',
+    ipadTitle: 'iPad preview (1180×820)',
     desktopTitle: 'Desktop preview (1280×800)',
     browserTitle: 'Open in default browser',
     failed: 'Failed to start preview',

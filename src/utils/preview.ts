@@ -9,7 +9,7 @@ export type PreviewMode = 'phone' | 'ipad' | 'desktop' | 'browser';
 
 const PREVIEW_SIZES: Record<Exclude<PreviewMode, 'browser'>, { width: number; height: number }> = {
   phone: { width: 390, height: 844 },
-  ipad: { width: 820, height: 1180 },
+  ipad: { width: 1180, height: 820 },
   desktop: { width: 1280, height: 800 },
 };
 

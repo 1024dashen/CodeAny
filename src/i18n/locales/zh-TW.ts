@@ -71,7 +71,7 @@ export default {
     desktop: '桌面',
     browser: '網站',
     phoneTitle: '手機預覽 (390×844)',
-    ipadTitle: 'iPad 預覽 (820×1180)',
+    ipadTitle: 'iPad 預覽 (1180×820)',
     desktopTitle: '桌面預覽 (1280×800)',
     browserTitle: '在預設瀏覽器中開啟',
     failed: '預覽啟動失敗',
