@@ -2,7 +2,11 @@
   <div class="sidebar" :class="{ collapsed }">
     <div class="sidebar-header">
       <button class="new-chat-btn" @click="handleNewSession" :title="collapsed ? t('sidebar.newApp') : ''">
-        <span class="icon">+</span>
+        <span class="icon" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M8 3v10M3 8h10" />
+          </svg>
+        </span>
         <span v-if="!collapsed" class="btn-text">{{ t('sidebar.newApp') }}</span>
       </button>
     </div>
@@ -211,9 +215,22 @@ onUnmounted(() => {
 }
 
 .new-chat-btn .icon {
-  font-size: 18px;
-  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+}
+
+.new-chat-btn .icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.new-chat-btn .btn-text {
+  line-height: 1;
 }
 
 .session-list {
