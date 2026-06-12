@@ -23,7 +23,7 @@
             <path d="M3 12h18 M12 3a14 14 0 0 1 0 18 M12 3a14 14 0 0 0 0 18" />
           </template>
         </svg>
-        <span class="mode-text">{{ mode.shortLabel }}</span>
+        <!-- <span class="mode-text">{{ mode.shortLabel }}</span> -->
       </button>
     </div>
   </div>

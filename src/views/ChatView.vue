@@ -114,7 +114,7 @@ const shortProjectFolderName = computed(() => projectFolderName.value.slice(0, 6
 
 const projectFolderTitle = computed(() => {
   if (!activeProjectDir.value) return '';
-  return `${projectFolderName.value}\n${activeProjectDir.value}`;
+  return `${activeProjectDir.value}`;
 });
 
 async function openProjectFolder() {
