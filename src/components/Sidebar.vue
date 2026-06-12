@@ -236,7 +236,11 @@ onUnmounted(() => {
 .session-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 12px;
+}
+
+.collapsed .session-list {
+  padding: 12px;
 }
 
 .session-item {
@@ -252,7 +256,7 @@ onUnmounted(() => {
 
 .collapsed .session-item {
   justify-content: center;
-  padding: 10px 0;
+  padding: 4px 0;
 }
 
 .session-item:hover {
@@ -283,13 +287,13 @@ onUnmounted(() => {
 }
 
 .session-icon.icon-collapsed {
-  font-size: 22px;
+  font-size: 16px;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
 }
 
 .session-title {
