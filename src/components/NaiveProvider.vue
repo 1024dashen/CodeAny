@@ -45,9 +45,9 @@ const themeOverrides = computed<GlobalThemeOverrides>(() => {
   const isDark = settingsStore.settings.theme === 'dark';
   return {
     common: {
-      primaryColor: isDark ? '#4a9eff' : '#1976d2',
-      primaryColorHover: isDark ? '#6ab0ff' : '#1565c0',
-      primaryColorPressed: isDark ? '#3a8eef' : '#0d47a1',
+      primaryColor: isDark ? '#61afef' : '#1976d2',
+      primaryColorHover: isDark ? '#79bdf2' : '#1565c0',
+      primaryColorPressed: isDark ? '#4d9de6' : '#0d47a1',
       borderRadius: '10px',
       borderRadiusSmall: '8px',
     },

@@ -313,6 +313,6 @@ watch(
 .tip:hover {
   border-color: var(--accent);
   color: var(--accent);
-  background: rgba(74, 158, 255, 0.08);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 </style>

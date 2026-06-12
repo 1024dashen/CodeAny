@@ -1,6 +1,6 @@
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
-import 'highlight.js/styles/github-dark.css';
+import 'highlight.js/styles/atom-one-dark.css';
 
 const AUTO_DETECT_LANGS = [
   'html',

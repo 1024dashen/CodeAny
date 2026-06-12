@@ -1,31 +1,31 @@
 :root {
-  --bg-primary: #1a1a2e;
-  --bg-secondary: #16213e;
-  --bg-sidebar: #0f1628;
-  --bg-input: #1e2a45;
-  --bg-message-user: #2a3f5f;
-  --bg-message-assistant: #1e2a45;
-  --bg-hover: #2a3a5a;
-  --bg-active: #3a4a6a;
-  --text-primary: #e0e0e0;
-  --text-secondary: #a0a0b0;
-  --text-muted: #6a6a80;
-  --border-color: #2a2a4a;
-  --accent: #4a9eff;
-  --accent-hover: #6ab0ff;
-  --danger: #ff4a6a;
-  --success: #4aff8a;
-  --scrollbar-bg: #1a1a2e;
-  --scrollbar-thumb: #3a3a5a;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --bg-primary: #282c34;
+  --bg-secondary: #2c313a;
+  --bg-sidebar: #21252b;
+  --bg-input: #1d1f23;
+  --bg-message-user: #323842;
+  --bg-message-assistant: #282c34;
+  --bg-hover: #323842;
+  --bg-active: #3e4451;
+  --text-primary: #abb2bf;
+  --text-secondary: #828997;
+  --text-muted: #5c6370;
+  --border-color: #3e4451;
+  --accent: #61afef;
+  --accent-hover: #79bdf2;
+  --danger: #e06c75;
+  --success: #98c379;
+  --scrollbar-bg: #21252b;
+  --scrollbar-thumb: #4b5263;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   /* 代码块固定深色（不随主题切换） */
-  --code-bg: #0d1117;
-  --code-header-bg: #161b22;
-  --code-border: #30363d;
-  --code-text: #e6edf3;
-  --code-text-muted: #8b949e;
-  --code-inline-bg: #1c2128;
-  --code-scrollbar-thumb: #484f58;
+  --code-bg: #21252b;
+  --code-header-bg: #282c34;
+  --code-border: #3e4451;
+  --code-text: #abb2bf;
+  --code-text-muted: #5c6370;
+  --code-inline-bg: #2c313a;
+  --code-scrollbar-thumb: #4b5263;
 }
 
 [data-theme="light"] {

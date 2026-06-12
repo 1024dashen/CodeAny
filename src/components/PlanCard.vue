@@ -37,7 +37,7 @@ defineEmits<{
   padding: 14px 16px;
   border: 1px solid var(--accent);
   border-radius: 10px;
-  background: rgba(74, 158, 255, 0.06);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
   max-width: 100%;
   min-width: 0;
 }
