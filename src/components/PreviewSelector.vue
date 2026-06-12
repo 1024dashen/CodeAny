@@ -72,7 +72,6 @@ async function handlePreview(mode: PreviewMode) {
   padding: 4px;
   border-radius: 8px;
   background: var(--bg-hover);
-  border: 1px solid var(--border-color);
 }
 
 .preview-label {
@@ -92,7 +91,7 @@ async function handlePreview(mode: PreviewMode) {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 8px;
+  padding: 0 8px;
   border-radius: 6px;
   font-size: 12px;
   color: var(--text-secondary);

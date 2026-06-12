@@ -290,7 +290,6 @@ watch(
   display: flex;
   align-items: center;
   gap: 4px;
-  border: 1px solid var(--border-color);
   background: var(--bg-hover);
 }
 
@@ -298,7 +297,6 @@ watch(
   display: flex;
   align-items: center;
   gap: 4px;
-  border: 1px solid var(--border-color);
   background: var(--bg-hover);
 }
 
