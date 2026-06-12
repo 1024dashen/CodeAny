@@ -120,8 +120,8 @@ watch(
 }
 
 .settings-nav {
-  width: 200px;
-  min-width: 200px;
+  width: 260px;
+  min-width: 260px;
   padding: 16px 12px;
   border-right: 1px solid var(--border-color);
   background: var(--bg-secondary);
