@@ -1,7 +1,7 @@
 mod preview_server;
 
 use preview_server::{
-    init_project_dir, start_preview_server, stop_preview_server, write_project_files,
+    init_project_dir, open_folder, start_preview_server, stop_preview_server, write_project_files,
     PreviewServerState,
 };
 use std::collections::HashMap;
@@ -17,6 +17,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .manage(PreviewServerState(Mutex::new(HashMap::new())))
         .invoke_handler(tauri::generate_handler![
+            open_folder,
             init_project_dir,
             write_project_files,
             start_preview_server,

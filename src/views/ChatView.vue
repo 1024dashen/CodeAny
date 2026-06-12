@@ -12,9 +12,15 @@
             {{ sidebarCollapsed ? '☰' : '◁' }}
           </button>
           <ModelSelector />
-          <span v-if="workspaceStore.workspaceRoot" class="workspace-path" :title="workspaceStore.workspaceRoot">
-            📂 {{ shortWorkspacePath }}
-          </span>
+          <button
+            v-if="activeProjectDir"
+            type="button"
+            class="project-folder-btn"
+            :title="projectFolderTitle"
+            @click="openProjectFolder"
+          >
+            📂 {{ shortProjectFolderName }}
+          </button>
         </div>
         <div class="header-actions">
           <button
@@ -81,6 +87,7 @@ import { useChatStore } from '@/stores/chat';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { ChatMessage } from '@/types';
 import { isValidPlanContent } from '@/utils/codeParser';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import Sidebar from '@/components/Sidebar.vue';
 import ModelSelector from '@/components/ModelSelector.vue';
 import PreviewSelector from '@/components/PreviewSelector.vue';
@@ -94,11 +101,32 @@ const workspaceStore = useWorkspaceStore();
 const messagesRef = ref<HTMLDivElement | null>(null);
 const sidebarCollapsed = ref(false);
 
-const shortWorkspacePath = computed(() => {
-  const path = workspaceStore.workspaceRoot;
-  if (path.length <= 30) return path;
-  return '...' + path.slice(-27);
+const activeProjectDir = computed(() => chatStore.activeSession?.projectDir ?? '');
+
+const projectFolderName = computed(() => {
+  const dir = activeProjectDir.value;
+  if (!dir) return '';
+  const normalized = dir.replace(/\\/g, '/');
+  return normalized.split('/').filter(Boolean).pop() ?? dir;
 });
+
+const shortProjectFolderName = computed(() => projectFolderName.value.slice(0, 6));
+
+const projectFolderTitle = computed(() => {
+  if (!activeProjectDir.value) return '';
+  return `${projectFolderName.value}\n${activeProjectDir.value}`;
+});
+
+async function openProjectFolder() {
+  const dir = activeProjectDir.value;
+  if (!dir || !isTauri()) return;
+  try {
+    await invoke('open_folder', { path: dir });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    alert(message);
+  }
+}
 
 const tips = computed(() => [
   t('chat.tips.todo'),
@@ -185,13 +213,21 @@ watch(
   min-width: 0;
 }
 
-.workspace-path {
+.project-folder-btn {
   font-size: 12px;
   color: var(--text-muted);
-  max-width: 200px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.project-folder-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .collapse-btn {

@@ -130,6 +130,15 @@ fn handle_connection(stream: &mut std::net::TcpStream, canonical_root: &Path) {
 }
 
 #[tauri::command]
+pub fn open_folder(path: String) -> Result<(), String> {
+    let dir = PathBuf::from(&path);
+    if !dir.is_dir() {
+        return Err(format!("目录不存在: {}", path));
+    }
+    open::that(&dir).map_err(|e| format!("打开文件夹失败: {}", e))
+}
+
+#[tauri::command]
 pub fn init_project_dir(workspace_root: String, session_id: String) -> Result<String, String> {
     let root = PathBuf::from(&workspace_root);
     if !root.is_dir() {
