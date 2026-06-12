@@ -88,6 +88,7 @@ import { useChatStore } from '@/stores/chat';
 import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { ChatMessage } from '@/types';
+import { isValidPlanContent } from '@/utils/codeParser';
 import Sidebar from '@/components/Sidebar.vue';
 import ModelSelector from '@/components/ModelSelector.vue';
 import PreviewSelector from '@/components/PreviewSelector.vue';
@@ -120,6 +121,7 @@ function shouldShowPlanCard(msg: ChatMessage, index: number): boolean {
   const session = chatStore.activeSession;
   if (!session || msg.role !== 'assistant') return false;
   if (session.generationPhase !== 'plan_ready') return false;
+  if (!session.planContent || !isValidPlanContent(session.planContent)) return false;
   const messages = session.messages;
   const lastAssistantIndex = [...messages]
     .map((m, i) => ({ m, i }))

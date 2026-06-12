@@ -15,6 +15,7 @@ import {
   parseProjectFiles,
   validateProjectFiles,
   extractPlanContent,
+  isValidPlanContent,
 } from '@/utils/codeParser';
 import { writeProjectFilesToDisk } from '@/utils/preview';
 import { applyGeneratedAppDefaults } from '@/utils/generatedAppDefaults';
@@ -74,9 +75,14 @@ export const useChatStore = defineStore('chat', () => {
     return phase === 'idle' || phase === 'plan_ready' || phase === 'done' || phase === 'error';
   });
 
-  const isPlanRevisionMode = computed(
-    () => activeSession.value?.generationPhase === 'plan_ready',
-  );
+  const isPlanRevisionMode = computed(() => {
+    const session = activeSession.value;
+    return (
+      session?.generationPhase === 'plan_ready'
+      && !!session.planContent
+      && isValidPlanContent(session.planContent)
+    );
+  });
 
   const canPreview = computed(() => {
     const session = activeSession.value;
@@ -311,8 +317,13 @@ export const useChatStore = defineStore('chat', () => {
     );
 
     if (contentResult) {
-      session.planContent = extractPlanContent(contentResult);
-      session.generationPhase = 'plan_ready';
+      if (isValidPlanContent(contentResult)) {
+        session.planContent = extractPlanContent(contentResult);
+        session.generationPhase = 'plan_ready';
+      } else {
+        session.planContent = undefined;
+        session.generationPhase = 'idle';
+      }
     } else if (!session.messages.find(m => m.id === assistantMsgId)?.error) {
       session.generationPhase = 'error';
     } else {
@@ -369,8 +380,13 @@ export const useChatStore = defineStore('chat', () => {
     );
 
     if (contentResult) {
-      session.planContent = extractPlanContent(contentResult);
-      session.generationPhase = 'plan_ready';
+      if (isValidPlanContent(contentResult)) {
+        session.planContent = extractPlanContent(contentResult);
+        session.generationPhase = 'plan_ready';
+      } else {
+        session.planContent = undefined;
+        session.generationPhase = 'idle';
+      }
     } else if (!session.messages.find(m => m.id === assistantMsgId)?.error) {
       session.generationPhase = 'error';
     } else {

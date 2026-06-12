@@ -85,6 +85,14 @@ function hasInlineAssets(html: string): boolean {
   return hasInlineStyle || hasInlineScript;
 }
 
+export function isValidPlanContent(content: string): boolean {
+  const text = content.trim();
+  if (!text) return false;
+  const hasPlanSection = /^##\s*开发计划/m.test(text);
+  const hasFilesSection = /^##\s*将生成的文件/m.test(text);
+  return hasPlanSection && hasFilesSection;
+}
+
 export function extractPlanContent(content: string): string {
   return content.trim();
 }
