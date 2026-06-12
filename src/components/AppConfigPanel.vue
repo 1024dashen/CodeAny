@@ -7,7 +7,8 @@
       </button>
     </div> -->
 
-    <div class="config-tabs">
+    <div class="config-tabs" :data-active="activeTab">
+      <span class="config-tab-indicator" aria-hidden="true" />
       <button
         type="button"
         class="config-tab"
@@ -27,7 +28,8 @@
     </div>
 
     <div v-if="config" class="config-body">
-      <section v-show="activeTab === 'desktop'" class="config-section">
+      <Transition name="config-tab" mode="out-in">
+      <section v-if="activeTab === 'desktop'" key="desktop" class="config-section">
         <div class="setting-row">
           <label>{{ t('appConfig.name') }}</label>
           <input v-model="config.desktop.name" type="text" />
@@ -86,7 +88,7 @@
         </div>
       </section>
 
-      <section v-show="activeTab === 'mobile'" class="config-section">
+      <section v-else key="mobile" class="config-section">
         <div class="setting-row">
           <label>{{ t('appConfig.name') }}</label>
           <input v-model="config.mobile.name" type="text" />
@@ -124,6 +126,7 @@
           <NSwitch v-model:value="config.mobile.cameraPermission" />
         </div>
       </section>
+      </Transition>
     </div>
   </div>
 </template>
@@ -196,31 +199,62 @@ watch(
 }
 
 .config-tabs {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 4px;
   padding: 4px;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
   border-radius: 8px;
   background: var(--bg-hover);
   border: 1px solid var(--border-color);
 }
 
+.config-tab-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px - 4px) / 2);
+  border-radius: 6px;
+  background: var(--accent);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.config-tabs[data-active='mobile'] .config-tab-indicator {
+  left: calc(4px + (100% - 8px - 4px) / 2 + 4px);
+}
+
 .config-tab {
-  flex: 1;
+  position: relative;
+  z-index: 1;
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 13px;
+  font-weight: 500;
   color: var(--text-secondary);
-  transition: all 0.2s;
+  transition: color 0.25s ease;
 }
 
-.config-tab:hover {
+.config-tab:hover:not(.active) {
   color: var(--text-primary);
 }
 
 .config-tab.active {
-  background: var(--accent);
   color: white;
+}
+
+.config-tab-enter-active,
+.config-tab-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.config-tab-enter-from,
+.config-tab-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
 }
 
 .config-section {
