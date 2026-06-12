@@ -26,13 +26,6 @@
           </button>
           <PreviewSelector v-if="chatStore.canPreview" />
           <button
-            class="theme-btn"
-            @click="settingsStore.setTheme(isDark ? 'light' : 'dark')"
-            :title="isDark ? t('chat.switchToLight') : t('chat.switchToDark')"
-          >
-            {{ isDark ? '☀' : '🌙' }}
-          </button>
-          <button
             v-if="chatStore.activeSession"
             class="clear-btn"
             @click="chatStore.clearMessages(chatStore.activeSessionId)"
@@ -85,7 +78,6 @@
 import { ref, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useChatStore } from '@/stores/chat';
-import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { ChatMessage } from '@/types';
 import { isValidPlanContent } from '@/utils/codeParser';
@@ -98,11 +90,9 @@ import WorkspaceSetup from '@/components/WorkspaceSetup.vue';
 
 const { t } = useI18n();
 const chatStore = useChatStore();
-const settingsStore = useSettingsStore();
 const workspaceStore = useWorkspaceStore();
 const messagesRef = ref<HTMLDivElement | null>(null);
 const sidebarCollapsed = ref(false);
-const isDark = computed(() => settingsStore.settings.theme === 'dark');
 
 const shortWorkspacePath = computed(() => {
   const path = workspaceStore.workspaceRoot;
@@ -239,19 +229,6 @@ watch(
 
 .clear-btn:hover {
   color: var(--danger);
-}
-
-.theme-btn {
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 16px;
-  color: var(--text-secondary);
-  transition: all 0.2s;
-}
-
-.theme-btn:hover {
-  background: var(--bg-hover);
-  color: var(--accent);
 }
 
 .chat-messages {
