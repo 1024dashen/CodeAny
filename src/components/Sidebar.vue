@@ -45,36 +45,54 @@
 
         <Transition name="menu">
           <div v-if="showUserMenu" class="user-dropdown" :class="{ 'dropdown-collapsed': collapsed }">
-            <button class="dropdown-item" @click="goProfile">
+            <button
+              class="dropdown-item"
+              :title="collapsed ? t('sidebar.profile') : ''"
+              @click="goProfile"
+            >
               <span class="dropdown-icon">👤</span>
-              <span v-if="collapsed">{{ t('sidebar.profileShort') }}</span>
-              <span v-else>{{ t('sidebar.profile') }}</span>
+              <span v-if="!collapsed">{{ t('sidebar.profile') }}</span>
             </button>
-            <button class="dropdown-item" @click="goSettings">
+            <button
+              class="dropdown-item"
+              :title="collapsed ? t('sidebar.settings') : ''"
+              @click="goSettings"
+            >
               <span class="dropdown-icon">⚙</span>
-              <span v-if="collapsed">{{ t('sidebar.settingsShort') }}</span>
-              <span v-else>{{ t('sidebar.settings') }}</span>
+              <span v-if="!collapsed">{{ t('sidebar.settings') }}</span>
             </button>
-            <button class="dropdown-item" @click="toggleTheme">
+            <button
+              class="dropdown-item"
+              :title="collapsed ? (isDark ? t('sidebar.lightMode') : t('sidebar.darkMode')) : ''"
+              @click="toggleTheme"
+            >
               <span class="dropdown-icon">{{ isDark ? '☀' : '🌙' }}</span>
-              <span v-if="collapsed">{{ isDark ? t('sidebar.lightShort') : t('sidebar.darkShort') }}</span>
-              <span v-else>{{ isDark ? t('sidebar.lightMode') : t('sidebar.darkMode') }}</span>
+              <span v-if="!collapsed">{{ isDark ? t('sidebar.lightMode') : t('sidebar.darkMode') }}</span>
             </button>
-            <button class="dropdown-item" @click="openHelp">
+            <button
+              class="dropdown-item"
+              :title="collapsed ? t('sidebar.help') : ''"
+              @click="openHelp"
+            >
               <span class="dropdown-icon">📖</span>
-              <span v-if="collapsed">{{ t('sidebar.helpShort') }}</span>
-              <span v-else>{{ t('sidebar.help') }}</span>
+              <span v-if="!collapsed">{{ t('sidebar.help') }}</span>
             </button>
-            <button class="dropdown-item" @click="openAbout">
+            <button
+              class="dropdown-item"
+              :title="collapsed ? t('sidebar.about') : ''"
+              @click="openAbout"
+            >
               <span class="dropdown-icon">ℹ️</span>
-              <span v-if="collapsed">{{ t('sidebar.aboutShort') }}</span>
-              <span v-else>{{ t('sidebar.about') }}</span>
+              <span v-if="!collapsed">{{ t('sidebar.about') }}</span>
             </button>
             <div class="dropdown-divider"></div>
-            <button class="dropdown-item danger" @click="handleLogout">
+            <button
+              class="dropdown-item danger"
+              :title="collapsed ? t('sidebar.logout') : ''"
+              @click="handleLogout"
+            >
               <span class="dropdown-icon">⏻</span>
-              <span v-if="collapsed">{{ t('sidebar.logoutShort') }}</span>
-              <span v-else>{{ t('sidebar.logout') }}</span>
+              <span v-if="!collapsed">{{ t('sidebar.logout') }}</span>
             </button>
           </div>
         </Transition>
@@ -436,12 +454,6 @@ onUnmounted(() => {
   z-index: 100;
 }
 
-.user-dropdown.dropdown-collapsed {
-  left: -4px;
-  right: -4px;
-  min-width: 140px;
-}
-
 .dropdown-item {
   width: 100%;
   display: flex;
@@ -473,6 +485,37 @@ onUnmounted(() => {
   text-align: center;
   font-size: 14px;
   flex-shrink: 0;
+}
+
+.user-dropdown.dropdown-collapsed {
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px;
+}
+
+.user-dropdown.dropdown-collapsed .dropdown-item {
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+
+.user-dropdown.dropdown-collapsed .dropdown-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 16px;
+}
+
+.user-dropdown.dropdown-collapsed .dropdown-divider {
+  width: 24px;
+  margin: 4px 0;
 }
 
 .dropdown-divider {
