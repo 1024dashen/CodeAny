@@ -20,6 +20,8 @@ import {
 import { writeProjectFilesToDisk } from '@/utils/preview';
 import { applyGeneratedAppDefaults } from '@/utils/generatedAppDefaults';
 import { ensureSessionIcon, pickRandomAppIcon } from '@/utils/sessionIcon';
+import { defaultGeneratedAppConfig, ensureAppConfig } from '@/utils/appConfig';
+import type { GeneratedAppConfig } from '@/types';
 import { t } from '@/i18n';
 
 const STORAGE_KEY = 'sessions';
@@ -57,6 +59,7 @@ export const useChatStore = defineStore('chat', () => {
   const activeSessionId = ref('');
   const isStreaming = ref(false);
   const isHydrated = ref(false);
+  const showAppConfigPanel = ref(false);
   let abortController: AbortController | null = null;
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -168,6 +171,29 @@ export const useChatStore = defineStore('chat', () => {
 
   function switchSession(sessionId: string) {
     activeSessionId.value = sessionId;
+    showAppConfigPanel.value = false;
+  }
+
+  function toggleAppConfigPanel() {
+    showAppConfigPanel.value = !showAppConfigPanel.value;
+  }
+
+  function closeAppConfigPanel() {
+    showAppConfigPanel.value = false;
+  }
+
+  function getActiveAppConfig(): GeneratedAppConfig | null {
+    const session = activeSession.value;
+    if (!session || !canPreview.value) return null;
+    return ensureAppConfig(session);
+  }
+
+  function updateAppConfig(config: GeneratedAppConfig) {
+    const session = activeSession.value;
+    if (!session) return;
+    session.appConfig = config;
+    session.updatedAt = Date.now();
+    saveDebounced();
   }
 
   function getAllUserRequirements(session: ChatSession): string {
@@ -457,6 +483,7 @@ export const useChatStore = defineStore('chat', () => {
           session.projectFiles = filesWithDefaults;
           session.generationPhase = 'done';
           if (!session.icon) session.icon = pickRandomAppIcon();
+          session.appConfig = defaultGeneratedAppConfig(session);
         } catch (err) {
           updateAssistantMessage(session.id, assistantMsgId, {
             error: err instanceof Error ? err.message : '写入文件失败',
@@ -471,6 +498,7 @@ export const useChatStore = defineStore('chat', () => {
         session.projectFiles = filesWithDefaults;
         session.generationPhase = 'done';
         if (!session.icon) session.icon = pickRandomAppIcon();
+        session.appConfig = defaultGeneratedAppConfig(session);
         updateAssistantMessage(session.id, assistantMsgId, {
           error: '未设置工作区目录，文件仅保存在内存中',
         });
@@ -498,6 +526,7 @@ export const useChatStore = defineStore('chat', () => {
       session.planContent = undefined;
       session.projectFiles = undefined;
       session.icon = undefined;
+      session.appConfig = undefined;
       session.updatedAt = Date.now();
       flushSave();
     }
@@ -513,10 +542,15 @@ export const useChatStore = defineStore('chat', () => {
     canSendMessage,
     isPlanRevisionMode,
     canPreview,
+    showAppConfigPanel,
     hydrate,
     createSession,
     deleteSession,
     switchSession,
+    toggleAppConfigPanel,
+    closeAppConfigPanel,
+    getActiveAppConfig,
+    updateAppConfig,
     sendMessage,
     revisePlan,
     confirmAndGenerate,

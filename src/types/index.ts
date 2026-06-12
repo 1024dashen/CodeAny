@@ -22,6 +22,40 @@ export interface ChatMessage {
   error?: string;
 }
 
+export interface DesktopAppConfig {
+  name: string;
+  url: string;
+  icon: string;
+  id: string;
+  version: string;
+  keepWindow: boolean;
+  debugMode: boolean;
+  windowWidth: number;
+  windowHeight: number;
+  minWidth: number;
+  minHeight: number;
+  maxWidth: number;
+  maxHeight: number;
+  userAgent: string;
+}
+
+export interface MobileAppConfig {
+  name: string;
+  url: string;
+  icon: string;
+  id: string;
+  version: string;
+  networkAccess: boolean;
+  downloadFiles: boolean;
+  locationPermission: boolean;
+  cameraPermission: boolean;
+}
+
+export interface GeneratedAppConfig {
+  desktop: DesktopAppConfig;
+  mobile: MobileAppConfig;
+}
+
 export interface ChatSession {
   id: string;
   title: string;
@@ -35,6 +69,7 @@ export interface ChatSession {
   projectFiles?: ProjectFile[];
   projectDir?: string;
   icon?: string;
+  appConfig?: GeneratedAppConfig;
 }
 
 export type GenerationPhase =

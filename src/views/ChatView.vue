@@ -30,6 +30,20 @@
           >
             {{ t('chat.workspace') }}
           </button>
+          <button
+            v-if="chatStore.canPreview"
+            type="button"
+            class="app-settings-btn"
+            :class="{ active: chatStore.showAppConfigPanel }"
+            :title="t('appConfig.title')"
+            @click="chatStore.toggleAppConfigPanel()"
+          >
+            <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v2 M12 21v2 M4.22 4.22l1.42 1.42 M18.36 18.36l1.42 1.42 M1 12h2 M21 12h2 M4.22 19.78l1.42-1.42 M18.36 5.64l1.42-1.42" />
+            </svg>
+            {{ t('appConfig.settingsShort') }}
+          </button>
           <PreviewSelector v-if="chatStore.canPreview" />
           <!-- <button
             v-if="chatStore.activeSession"
@@ -43,26 +57,29 @@
       </div>
 
       <div ref="messagesRef" class="chat-messages">
-        <div v-if="!chatStore.activeSession || chatStore.activeSession.messages.length === 0" class="empty-state">
-          <div class="empty-icon">🎨</div>
-          <h2>CodeAny</h2>
-          <p>{{ t('chat.emptyDesc') }}</p>
-          <div class="quick-tips">
-            <div class="tip" v-for="tip in tips" :key="tip" @click="quickSend(tip)">
-              {{ tip }}
+        <AppConfigPanel v-if="chatStore.showAppConfigPanel && chatStore.canPreview" />
+        <template v-else>
+          <div v-if="!chatStore.activeSession || chatStore.activeSession.messages.length === 0" class="empty-state">
+            <div class="empty-icon">🎨</div>
+            <h2>CodeAny</h2>
+            <p>{{ t('chat.emptyDesc') }}</p>
+            <div class="quick-tips">
+              <div class="tip" v-for="tip in tips" :key="tip" @click="quickSend(tip)">
+                {{ tip }}
+              </div>
             </div>
           </div>
-        </div>
-        <MessageBubble
-          v-for="(msg, index) in chatStore.activeSession?.messages"
-          :key="msg.id"
-          :message="msg"
-          :show-plan-card="shouldShowPlanCard(msg, index)"
-          :show-project-files="shouldShowProjectFiles(msg, index)"
-          :project-files="chatStore.activeSession?.projectFiles"
-          :is-generating="chatStore.isStreaming"
-          @confirm-plan="chatStore.confirmAndGenerate()"
-        />
+          <MessageBubble
+            v-for="(msg, index) in chatStore.activeSession?.messages"
+            :key="msg.id"
+            :message="msg"
+            :show-plan-card="shouldShowPlanCard(msg, index)"
+            :show-project-files="shouldShowProjectFiles(msg, index)"
+            :project-files="chatStore.activeSession?.projectFiles"
+            :is-generating="chatStore.isStreaming"
+            @confirm-plan="chatStore.confirmAndGenerate()"
+          />
+        </template>
       </div>
 
       <div v-if="chatStore.isPlanRevisionMode" class="input-hint">
@@ -91,6 +108,7 @@ import { invoke, isTauri } from '@tauri-apps/api/core';
 import Sidebar from '@/components/Sidebar.vue';
 import ModelSelector from '@/components/ModelSelector.vue';
 import PreviewSelector from '@/components/PreviewSelector.vue';
+import AppConfigPanel from '@/components/AppConfigPanel.vue';
 import MessageBubble from '@/components/MessageBubble.vue';
 import ChatInput from '@/components/ChatInput.vue';
 import WorkspaceSetup from '@/components/WorkspaceSetup.vue';
@@ -250,12 +268,34 @@ watch(
 }
 
 .workspace-btn,
-.clear-btn {
+.clear-btn,
+.app-settings-btn {
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 13px;
   color: var(--text-secondary);
   transition: all 0.2s;
+}
+
+.app-settings-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-hover);
+}
+
+.app-settings-btn:hover,
+.app-settings-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.settings-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .workspace-btn:hover,
