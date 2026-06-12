@@ -167,7 +167,7 @@ watch(
 .app-config-panel {
   /* max-width: 720px; */
   margin: 0 auto;
-  padding: 24px 20px 32px;
+  padding: 10px;
 }
 
 .panel-header {
