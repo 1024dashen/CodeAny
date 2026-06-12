@@ -195,7 +195,7 @@ select {
   overflow-x: auto;
   max-width: 100%;
   background: var(--code-bg);
-  border: 1px solid var(--code-border);
+  /* border: 1px solid var(--code-border); */
 }
 
 .markdown-body pre.hljs {

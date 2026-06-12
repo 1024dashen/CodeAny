@@ -246,7 +246,7 @@ async function copyMessage() {
 .message-bubble {
   padding: 10px 14px;
   border-radius: 12px;
-  background: var(--bg-message-assistant);
+  background: var(--bg-secondary);
   font-size: 14px;
   line-height: 1.7;
   word-break: break-word;
@@ -267,7 +267,7 @@ async function copyMessage() {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--code-scrollbar-thumb) 85%, transparent) transparent;
   background: var(--code-bg);
-  border: 1px solid var(--code-border);
+  /* border: 1px solid var(--code-border); */
 }
 
 .message-bubble :deep(.markdown-body pre::-webkit-scrollbar) {

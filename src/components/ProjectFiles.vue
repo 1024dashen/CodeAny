@@ -41,7 +41,7 @@ const selectedFile = computed(() =>
 .project-files {
   margin-top: 12px;
   padding: 12px 14px;
-  border: 1px solid var(--border-color);
+  /* border: 1px solid var(--border-color); */
   border-radius: 10px;
   background: var(--bg-secondary);
   max-width: 100%;
