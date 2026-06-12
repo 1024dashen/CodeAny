@@ -31,14 +31,14 @@
             {{ t('chat.workspace') }}
           </button>
           <PreviewSelector v-if="chatStore.canPreview" />
-          <button
+          <!-- <button
             v-if="chatStore.activeSession"
             class="clear-btn"
             @click="chatStore.clearMessages(chatStore.activeSessionId)"
             :title="t('chat.clearChat')"
           >
             🗑 {{ t('chat.clearChat') }}
-          </button>
+          </button> -->
         </div>
       </div>
 
