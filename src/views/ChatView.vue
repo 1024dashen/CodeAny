@@ -41,6 +41,16 @@
             {{ t('appConfig.settingsShort') }}
           </button>
           <PreviewSelector v-if="chatStore.canPreview" />
+          <button
+            v-if="chatStore.canPreview"
+            type="button"
+            class="publish-btn"
+            :title="t('publish.title')"
+            @click="showPublishDialog = true"
+          >
+            {{ t('publish.button') }}
+          </button>
+          <PublishDialog v-model:show="showPublishDialog" />
           <!-- <button
             v-if="chatStore.activeSession"
             class="clear-btn"
@@ -104,6 +114,7 @@ import { invoke, isTauri } from '@tauri-apps/api/core';
 import Sidebar from '@/components/Sidebar.vue';
 import ModelSelector from '@/components/ModelSelector.vue';
 import PreviewSelector from '@/components/PreviewSelector.vue';
+import PublishDialog from '@/components/PublishDialog.vue';
 import AppConfigPanel from '@/components/AppConfigPanel.vue';
 import MessageBubble from '@/components/MessageBubble.vue';
 import ChatInput from '@/components/ChatInput.vue';
@@ -114,6 +125,7 @@ const chatStore = useChatStore();
 const workspaceStore = useWorkspaceStore();
 const messagesRef = ref<HTMLDivElement | null>(null);
 const sidebarCollapsed = ref(false);
+const showPublishDialog = ref(false);
 
 const activeProjectDir = computed(() => chatStore.activeSession?.projectDir ?? '');
 
@@ -265,12 +277,24 @@ watch(
 
 .workspace-btn,
 .clear-btn,
-.app-settings-btn {
+.app-settings-btn,
+.publish-btn {
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 13px;
   color: var(--text-secondary);
   transition: all 0.2s;
+}
+
+.publish-btn {
+  background: var(--accent);
+  color: white;
+  font-weight: 500;
+}
+
+.publish-btn:hover {
+  background: var(--accent-hover);
+  color: white;
 }
 
 .app-settings-btn {
