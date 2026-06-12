@@ -48,19 +48,13 @@
           <label>{{ t('appConfig.version') }}</label>
           <input v-model="config.desktop.version" type="text" />
         </div>
-        <div class="setting-row checkbox-row">
+        <div class="setting-row switch-row">
           <label>{{ t('appConfig.keepWindow') }}</label>
-          <label class="toggle-switch">
-            <input v-model="config.desktop.keepWindow" type="checkbox" />
-            <span class="toggle-slider"></span>
-          </label>
+          <NSwitch v-model:value="config.desktop.keepWindow" />
         </div>
-        <div class="setting-row checkbox-row">
+        <div class="setting-row switch-row">
           <label>{{ t('appConfig.debugMode') }}</label>
-          <label class="toggle-switch">
-            <input v-model="config.desktop.debugMode" type="checkbox" />
-            <span class="toggle-slider"></span>
-          </label>
+          <NSwitch v-model:value="config.desktop.debugMode" />
         </div>
         <div class="setting-row">
           <label>{{ t('appConfig.windowSize') }}</label>
@@ -113,33 +107,21 @@
           <label>{{ t('appConfig.version') }}</label>
           <input v-model="config.mobile.version" type="text" />
         </div>
-        <div class="setting-row checkbox-row">
+        <div class="setting-row switch-row">
           <label>{{ t('appConfig.networkAccess') }}</label>
-          <label class="toggle-switch">
-            <input v-model="config.mobile.networkAccess" type="checkbox" />
-            <span class="toggle-slider"></span>
-          </label>
+          <NSwitch v-model:value="config.mobile.networkAccess" />
         </div>
-        <div class="setting-row checkbox-row">
+        <div class="setting-row switch-row">
           <label>{{ t('appConfig.downloadFiles') }}</label>
-          <label class="toggle-switch">
-            <input v-model="config.mobile.downloadFiles" type="checkbox" />
-            <span class="toggle-slider"></span>
-          </label>
+          <NSwitch v-model:value="config.mobile.downloadFiles" />
         </div>
-        <div class="setting-row checkbox-row">
+        <div class="setting-row switch-row">
           <label>{{ t('appConfig.locationPermission') }}</label>
-          <label class="toggle-switch">
-            <input v-model="config.mobile.locationPermission" type="checkbox" />
-            <span class="toggle-slider"></span>
-          </label>
+          <NSwitch v-model:value="config.mobile.locationPermission" />
         </div>
-        <div class="setting-row checkbox-row">
+        <div class="setting-row switch-row">
           <label>{{ t('appConfig.cameraPermission') }}</label>
-          <label class="toggle-switch">
-            <input v-model="config.mobile.cameraPermission" type="checkbox" />
-            <span class="toggle-slider"></span>
-          </label>
+          <NSwitch v-model:value="config.mobile.cameraPermission" />
         </div>
       </section>
     </div>
@@ -149,6 +131,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { NSwitch } from 'naive-ui';
 import { useChatStore } from '@/stores/chat';
 import type { GeneratedAppConfig } from '@/types';
 
@@ -294,52 +277,7 @@ watch(
   flex-shrink: 0;
 }
 
-.checkbox-row {
+.switch-row {
   justify-content: space-between;
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
-  background: var(--bg-hover);
-  border: 1px solid var(--border-color);
-  border-radius: 24px;
-  transition: background 0.2s;
-}
-
-.toggle-slider::before {
-  content: '';
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 2px;
-  bottom: 2px;
-  background: white;
-  border-radius: 50%;
-  transition: transform 0.2s;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.toggle-switch input:checked + .toggle-slider::before {
-  transform: translateX(20px);
 }
 </style>

@@ -45,16 +45,12 @@
           @update:value="settingsStore.setFontSize"
         />
       </div>
-      <div class="setting-row checkbox-row">
+      <div class="setting-row switch-row">
         <label>{{ t('editor.enterSend') }}</label>
-        <label class="toggle-switch">
-          <input
-            type="checkbox"
-            :checked="settingsStore.settings.sendOnEnter"
-            @change="settingsStore.setSendOnEnter(($event.target as HTMLInputElement).checked)"
-          />
-          <span class="toggle-slider"></span>
-        </label>
+        <NSwitch
+          :value="settingsStore.settings.sendOnEnter"
+          @update:value="settingsStore.setSendOnEnter"
+        />
       </div>
       <p class="section-hint">
         {{ settingsStore.settings.sendOnEnter ? t('editor.enterSendHint') : t('editor.enterNewlineHint') }}
@@ -66,7 +62,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { NSelect, type SelectOption } from 'naive-ui';
+import { NSelect, NSwitch, type SelectOption } from 'naive-ui';
 import { useSettingsStore } from '@/stores/settings';
 import { useWorkspaceStore } from '@/stores/workspace';
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
@@ -142,53 +138,8 @@ const fontSizeOptions = computed<SelectOption[]>(() =>
   flex: 1;
 }
 
-.checkbox-row {
+.switch-row {
   justify-content: space-between;
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
-  background: var(--bg-hover);
-  border: 1px solid var(--border-color);
-  border-radius: 24px;
-  transition: background 0.2s;
-}
-
-.toggle-slider::before {
-  content: '';
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 2px;
-  bottom: 2px;
-  background: white;
-  border-radius: 50%;
-  transition: transform 0.2s;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.toggle-switch input:checked + .toggle-slider::before {
-  transform: translateX(20px);
 }
 
 .add-btn {
