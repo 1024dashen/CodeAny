@@ -4,6 +4,7 @@ import type { AppSettings, ModelProvider, ServiceProviderId } from '@/types';
 import { DEFAULT_PROVIDERS } from '@/utils/providers';
 import { defaultServiceTokens } from '@/utils/serviceProviders';
 import { loadStorageValue, saveStorageValue } from '@/utils/store';
+import { syncTauriTheme } from '@/utils/theme';
 import { setAppLocale, DEFAULT_LOCALE } from '@/i18n';
 import type { AppLocale } from '@/types';
 
@@ -64,6 +65,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const saved = await loadStorageValue<AppSettings | null>(STORAGE_KEY, null);
     settings.value = saved ? mergeSettings(saved) : defaultSettings();
     document.documentElement.setAttribute('data-theme', settings.value.theme);
+    syncTauriTheme(settings.value.theme);
     setAppLocale(settings.value.locale);
     isHydrated.value = true;
   }
@@ -142,6 +144,7 @@ export const useSettingsStore = defineStore('settings', () => {
   function setTheme(theme: 'light' | 'dark') {
     settings.value.theme = theme;
     document.documentElement.setAttribute('data-theme', theme);
+    syncTauriTheme(theme);
     save();
   }
 

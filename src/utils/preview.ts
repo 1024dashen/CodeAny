@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { LogicalSize } from '@tauri-apps/api/dpi';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { open } from '@tauri-apps/plugin-shell';
-import { isTauriEnv } from '@/utils/store';
+import { isTauri } from '@tauri-apps/api/core';
 import { t } from '@/i18n';
 
 export type PreviewMode = 'phone' | 'ipad' | 'desktop' | 'browser';
@@ -75,7 +75,7 @@ export async function openProjectPreview(
   sessionTitle: string,
   projectDir: string,
 ): Promise<void> {
-  if (!isTauriEnv()) {
+  if (!isTauri()) {
     throw new Error(t('preview.tauriOnly'));
   }
 
@@ -94,6 +94,6 @@ export async function writeProjectFilesToDisk(
   projectDir: string,
   files: Array<{ path: string; content: string }>,
 ): Promise<void> {
-  if (!isTauriEnv()) return;
+  if (!isTauri()) return;
   await invoke('write_project_files', { dir: projectDir, files });
 }

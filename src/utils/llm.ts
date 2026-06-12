@@ -1,9 +1,6 @@
 import type { ChatMessage, ModelProvider, StreamChunk } from '@/types';
+import { isTauri } from '@tauri-apps/api/core';
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
-
-function isTauriEnv(): boolean {
-  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
-}
 
 /**
  * 通用 fetch：Tauri 环境用插件 fetch（绕过 CORS），浏览器环境降级为原生 fetch
@@ -12,7 +9,7 @@ async function smartFetch(
   url: string,
   init: RequestInit,
 ): Promise<Response> {
-  if (isTauriEnv()) {
+  if (isTauri()) {
     return tauriFetch(url, init);
   }
   return fetch(url, init);

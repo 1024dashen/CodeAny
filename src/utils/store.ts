@@ -1,3 +1,4 @@
+import { isTauri } from '@tauri-apps/api/core';
 import { LazyStore } from '@tauri-apps/plugin-store';
 
 const STORE_FILE = 'app-data.json';
@@ -7,10 +8,6 @@ const LEGACY_KEYS = {
   sessions: 'codeany-sessions',
   settings: 'codeany-settings',
 } as const;
-
-export function isTauriEnv(): boolean {
-  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
-}
 
 let store: LazyStore | null = null;
 
@@ -31,7 +28,7 @@ async function getFromLocalStorage<T>(key: string): Promise<T | null> {
 }
 
 export async function migrateLegacyStorage(): Promise<void> {
-  if (!isTauriEnv()) return;
+  if (!isTauri()) return;
   if (localStorage.getItem(MIGRATION_FLAG)) return;
 
   const appStore = getStore();
@@ -51,7 +48,7 @@ export async function migrateLegacyStorage(): Promise<void> {
 }
 
 export async function loadStorageValue<T>(key: string, fallback: T): Promise<T> {
-  if (isTauriEnv()) {
+  if (isTauri()) {
     await migrateLegacyStorage();
     const value = await getStore().get<T>(key);
     return value ?? fallback;
@@ -62,7 +59,7 @@ export async function loadStorageValue<T>(key: string, fallback: T): Promise<T> 
 }
 
 export async function saveStorageValue<T>(key: string, value: T): Promise<void> {
-  if (isTauriEnv()) {
+  if (isTauri()) {
     const appStore = getStore();
     await appStore.set(key, value);
     await appStore.save();

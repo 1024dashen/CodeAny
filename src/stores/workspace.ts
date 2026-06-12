@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { open } from '@tauri-apps/plugin-dialog';
-import { invoke } from '@tauri-apps/api/core';
-import { loadWorkspaceRoot, saveWorkspaceRoot, isTauriEnv } from '@/utils/store';
+import { invoke, isTauri } from '@tauri-apps/api/core';
+import { loadWorkspaceRoot, saveWorkspaceRoot } from '@/utils/store';
 import { t } from '@/i18n';
 
 export const useWorkspaceStore = defineStore('workspace', () => {
@@ -16,7 +16,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   }
 
   async function pickWorkspaceRoot(): Promise<string | null> {
-    if (!isTauriEnv()) {
+    if (!isTauri()) {
       error.value = t('workspace.tauriOnly');
       return null;
     }
@@ -49,7 +49,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     const root = await ensureWorkspaceRoot();
     if (!root) return null;
 
-    if (!isTauriEnv()) {
+    if (!isTauri()) {
       return `${root}/${sessionId}`;
     }
 
