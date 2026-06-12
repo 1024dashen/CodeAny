@@ -287,14 +287,11 @@ watch(
 }
 
 .publish-btn {
-  background: var(--accent);
-  color: white;
-  font-weight: 500;
-}
-
-.publish-btn:hover {
-  background: var(--accent-hover);
-  color: white;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-hover);
 }
 
 .app-settings-btn {

@@ -4,7 +4,7 @@
     preset="card"
     :title="t('publish.title')"
     class="publish-dialog"
-    :style="{ width: '520px', maxWidth: '92vw' }"
+    :style="{ width: '520px', maxWidth: '92vw', height: '380px' }"
     :mask-closable="false"
     @after-leave="resetForm"
   >
@@ -196,7 +196,6 @@ function handleConfirm() {
 }
 
 .form-row label {
-  min-width: 88px;
   flex-shrink: 0;
   font-size: 13px;
   color: var(--text-secondary);
@@ -216,8 +215,9 @@ function handleConfirm() {
 
 .dialog-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 12px;
+  /* border-top: 1px solid var(--border-color); */
 }
 </style>
 

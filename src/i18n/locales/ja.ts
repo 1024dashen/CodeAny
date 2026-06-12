@@ -17,6 +17,7 @@ export default {
     copy: 'コピー',
     send: '送信',
     stop: '停止',
+    cancel: 'キャンセル',
     confirm: '確認',
   },
   lang: {

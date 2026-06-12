@@ -17,6 +17,7 @@ export default {
     copy: '复制',
     send: '发送',
     stop: '停止',
+    cancel: '取消',
     confirm: '确认',
   },
   lang: {

@@ -17,6 +17,7 @@ export default {
     copy: 'Copy',
     send: 'Send',
     stop: 'Stop',
+    cancel: 'Cancel',
     confirm: 'Confirm',
   },
   lang: {

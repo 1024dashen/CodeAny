@@ -17,6 +17,7 @@ export default {
     copy: '복사',
     send: '보내기',
     stop: '중지',
+    cancel: '취소',
     confirm: '확인',
   },
   lang: {
