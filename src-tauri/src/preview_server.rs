@@ -363,3 +363,21 @@ pub fn read_dir_tree(dir_path: String) -> Result<Vec<FileTreeNode>, String> {
 
     Ok(read_dir_recursive(&dir, &ignored_dirs, &ignored_files))
 }
+
+#[tauri::command]
+pub fn read_file_content(file_path: String) -> Result<String, String> {
+    let path = PathBuf::from(&file_path);
+    if !path.is_file() {
+        return Err(format!("文件不存在: {}", file_path));
+    }
+    std::fs::read_to_string(&path).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn write_file_content(file_path: String, content: String) -> Result<(), String> {
+    let path = PathBuf::from(&file_path);
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    std::fs::write(&path, content).map_err(|e| e.to_string())
+}

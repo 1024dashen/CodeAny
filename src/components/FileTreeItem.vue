@@ -3,7 +3,8 @@
     <div
       class="tree-row"
       :style="{ paddingLeft: `${depth * 14 + 6}px` }"
-      @click="toggleExpand"
+      :class="{ 'selected': !node.isDir && workspaceStore.selectedFilePath === node.path }"
+      @click="handleClick"
     >
       <span v-if="node.isDir" class="tree-chevron" :class="{ expanded }">▶</span>
       <span v-else class="tree-chevron-placeholder"></span>
@@ -23,6 +24,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useWorkspaceStore } from '@/stores/workspace';
 import type { FileTreeNode } from '@/stores/workspace';
 
 const props = defineProps<{
@@ -30,11 +32,14 @@ const props = defineProps<{
   depth: number;
 }>();
 
+const workspaceStore = useWorkspaceStore();
 const expanded = ref(false);
 
-function toggleExpand() {
+function handleClick() {
   if (props.node.isDir) {
     expanded.value = !expanded.value;
+  } else {
+    workspaceStore.selectFile(props.node.path);
   }
 }
 
@@ -86,6 +91,15 @@ const fileIcon = computed(() => {
 
 .tree-row:hover {
   background: var(--bg-hover);
+}
+
+.tree-row.selected {
+  background: var(--bg-active);
+  color: var(--accent);
+}
+
+.tree-row.selected .tree-name {
+  color: var(--accent);
 }
 
 .tree-chevron {

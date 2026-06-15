@@ -19,6 +19,9 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   const fileTree = ref<FileTreeNode[]>([]);
   const fileTreeRoot = ref('');
   const fileTreeLoading = ref(false);
+  const selectedFilePath = ref('');
+  const selectedFileContent = ref('');
+  const selectedFileLoading = ref(false);
 
   async function hydrate() {
     workspaceRoot.value = await loadWorkspaceRoot();
@@ -92,12 +95,41 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   function clearFileTree() {
     fileTree.value = [];
     fileTreeRoot.value = '';
+    selectedFilePath.value = '';
+    selectedFileContent.value = '';
   }
 
   async function refreshFileTree(): Promise<void> {
     if (fileTreeRoot.value) {
       await loadFileTree(fileTreeRoot.value);
     }
+  }
+
+  async function selectFile(filePath: string): Promise<void> {
+    if (!isTauri()) return;
+    selectedFilePath.value = filePath;
+    selectedFileLoading.value = true;
+    selectedFileContent.value = '';
+    try {
+      selectedFileContent.value = await invoke<string>('read_file_content', { filePath });
+    } catch (err) {
+      selectedFileContent.value = `// 无法读取文件: ${err instanceof Error ? err.message : String(err)}`;
+    } finally {
+      selectedFileLoading.value = false;
+    }
+  }
+
+  async function saveFile(filePath: string, content: string): Promise<void> {
+    if (!isTauri()) return;
+    await invoke('write_file_content', { filePath, content });
+    if (selectedFilePath.value === filePath) {
+      selectedFileContent.value = content;
+    }
+  }
+
+  function clearSelectedFile() {
+    selectedFilePath.value = '';
+    selectedFileContent.value = '';
   }
 
   return {
@@ -107,6 +139,9 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     fileTree,
     fileTreeRoot,
     fileTreeLoading,
+    selectedFilePath,
+    selectedFileContent,
+    selectedFileLoading,
     hydrate,
     pickWorkspaceRoot,
     ensureWorkspaceRoot,
@@ -114,5 +149,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     loadFileTree,
     clearFileTree,
     refreshFileTree,
+    selectFile,
+    clearSelectedFile,
+    saveFile,
   };
 });

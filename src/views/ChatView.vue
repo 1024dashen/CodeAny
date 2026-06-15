@@ -62,7 +62,17 @@
         </div>
       </div>
 
-      <div ref="messagesRef" class="chat-messages">
+      <!-- 文件查看器模式（文件树中选中文件时） -->
+      <FileEditor
+        v-if="workspaceStore.selectedFilePath"
+        :file-path="workspaceStore.selectedFilePath"
+        :content="workspaceStore.selectedFileContent"
+        :loading="workspaceStore.selectedFileLoading"
+        @close="workspaceStore.clearSelectedFile()"
+      />
+
+      <!-- 正常聊天模式 -->
+      <div v-else ref="messagesRef" class="chat-messages">
         <AppConfigPanel v-if="chatStore.showAppConfigPanel && chatStore.canPreview" />
         <template v-else>
           <div v-if="!chatStore.activeSession || chatStore.activeSession.messages.length === 0" class="empty-state">
@@ -118,6 +128,7 @@ import AppConfigPanel from '@/components/AppConfigPanel.vue';
 import MessageBubble from '@/components/MessageBubble.vue';
 import ChatInput from '@/components/ChatInput.vue';
 import WorkspaceSetup from '@/components/WorkspaceSetup.vue';
+import FileEditor from '@/components/FileEditor.vue';
 
 const { t } = useI18n();
 const chatStore = useChatStore();
@@ -382,5 +393,11 @@ watch(
   border-color: var(--accent);
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* FileEditor 组件填满剩余空间 */
+.chat-main > .file-editor-wrap {
+  flex: 1;
+  min-height: 0;
 }
 </style>
