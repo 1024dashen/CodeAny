@@ -47,6 +47,10 @@ export default {
     logoutShort: '로그아웃',
     aboutMessage: 'CodeAny v0.1.0\n다양한 LLM을 지원하는 AI 어시스턴트',
   },
+  fileTree: {
+    backToChats: '대화로 돌아가기',
+    refresh: '새로고침',
+  },
   chat: {
     expandSidebar: '사이드바 펼치기',
     collapseSidebar: '사이드바 접기',

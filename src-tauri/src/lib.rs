@@ -1,8 +1,8 @@
 mod preview_server;
 
 use preview_server::{
-    init_project_dir, open_folder, start_preview_server, stop_preview_server, write_project_files,
-    PreviewServerState,
+    init_project_dir, open_folder, read_dir_tree, start_preview_server, stop_preview_server,
+    write_project_files, PreviewServerState,
 };
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -22,6 +22,7 @@ pub fn run() {
             write_project_files,
             start_preview_server,
             stop_preview_server,
+            read_dir_tree,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

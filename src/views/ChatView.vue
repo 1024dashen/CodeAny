@@ -1,6 +1,6 @@
 <template>
   <div class="chat-layout">
-    <Sidebar :collapsed="sidebarCollapsed" />
+    <Sidebar ref="sidebarRef" :collapsed="sidebarCollapsed" />
     <div class="chat-main">
       <div class="chat-header">
         <div class="header-left">
@@ -110,7 +110,6 @@ import { useChatStore } from '@/stores/chat';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { ChatMessage } from '@/types';
 import { isValidPlanContent } from '@/utils/codeParser';
-import { invoke, isTauri } from '@tauri-apps/api/core';
 import Sidebar from '@/components/Sidebar.vue';
 import ModelSelector from '@/components/ModelSelector.vue';
 import PreviewSelector from '@/components/PreviewSelector.vue';
@@ -124,6 +123,7 @@ const { t } = useI18n();
 const chatStore = useChatStore();
 const workspaceStore = useWorkspaceStore();
 const messagesRef = ref<HTMLDivElement | null>(null);
+const sidebarRef = ref<InstanceType<typeof Sidebar> | null>(null);
 const sidebarCollapsed = ref(false);
 const showPublishDialog = ref(false);
 
@@ -145,13 +145,11 @@ const projectFolderTitle = computed(() => {
 
 async function openProjectFolder() {
   const dir = activeProjectDir.value;
-  if (!dir || !isTauri()) return;
-  try {
-    await invoke('open_folder', { path: dir });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    alert(message);
-  }
+  if (!dir) return;
+  // 展开侧边栏并切换到文件树模式
+  sidebarCollapsed.value = false;
+  await nextTick();
+  sidebarRef.value?.openFileTree(dir);
 }
 
 const tips = computed(() => [

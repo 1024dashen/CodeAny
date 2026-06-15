@@ -47,6 +47,10 @@ export default {
     logoutShort: '退出',
     aboutMessage: 'CodeAny v0.1.0\nAI 智能对话助手，支持多种大语言模型',
   },
+  fileTree: {
+    backToChats: '返回对话',
+    refresh: '刷新',
+  },
   chat: {
     expandSidebar: '展开侧边栏',
     collapseSidebar: '折叠侧边栏',

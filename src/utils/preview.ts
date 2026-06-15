@@ -78,7 +78,7 @@ export async function openProjectPreview(
   if (!isTauri()) {
     throw new Error(t('preview.tauriOnly'));
   }
-
+  console.log("projectDir", projectDir);
   const port = await ensurePreviewServer(sessionId, projectDir);
   const url = `http://127.0.0.1:${port}/`;
 

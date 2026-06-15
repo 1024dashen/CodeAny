@@ -47,6 +47,10 @@ export default {
     logoutShort: 'Logout',
     aboutMessage: 'CodeAny v0.1.0\nAI assistant supporting multiple LLMs',
   },
+  fileTree: {
+    backToChats: 'Back to chats',
+    refresh: 'Refresh',
+  },
   chat: {
     expandSidebar: 'Expand sidebar',
     collapseSidebar: 'Collapse sidebar',

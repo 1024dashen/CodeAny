@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fs;
 use std::io::{Read, Write};
 use std::net::TcpListener;
@@ -13,6 +14,16 @@ use std::time::Duration;
 pub struct ProjectFile {
     pub path: String,
     pub content: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FileTreeNode {
+    pub name: String,
+    pub path: String,
+    pub is_dir: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub children: Option<Vec<FileTreeNode>>,
 }
 
 pub(crate) struct PreviewServer {
@@ -266,4 +277,89 @@ pub fn stop_preview_server(
     } else {
         Err(format!("未找到端口 {} 对应的预览服务", port))
     }
+}
+
+const IGNORED_DIRS: &[&str] = &[
+    "node_modules",
+    ".git",
+    "__pycache__",
+    ".next",
+    ".nuxt",
+    "dist",
+    ".cache",
+    ".turbo",
+    ".parcel-cache",
+    ".vercel",
+    ".terraform",
+    "target",
+    "build",
+    ".gradle",
+    "vendor",
+    "Pods",
+];
+
+const IGNORED_FILES: &[&str] = &[
+    ".DS_Store",
+    "Thumbs.db",
+    "desktop.ini",
+];
+
+fn read_dir_recursive(dir: &Path, ignored_dirs: &HashSet<&str>, ignored_files: &HashSet<&str>) -> Vec<FileTreeNode> {
+    let entries = match fs::read_dir(dir) {
+        Ok(e) => e,
+        Err(_) => return Vec::new(),
+    };
+
+    let mut dirs: Vec<FileTreeNode> = Vec::new();
+    let mut files: Vec<FileTreeNode> = Vec::new();
+
+    for entry in entries.flatten() {
+        let file_name = entry.file_name().to_string_lossy().into_owned();
+
+        if ignored_dirs.contains(file_name.as_str()) || ignored_files.contains(file_name.as_str()) {
+            continue;
+        }
+
+        let path = entry.path();
+        let is_dir = path.is_dir();
+
+        let node = FileTreeNode {
+            name: file_name,
+            path: path.to_string_lossy().into_owned(),
+            is_dir,
+            children: None,
+        };
+
+        if is_dir {
+            dirs.push(node);
+        } else {
+            files.push(node);
+        }
+    }
+
+    dirs.sort_by(|a, b| a.name.cmp(&b.name));
+    files.sort_by(|a, b| a.name.cmp(&b.name));
+
+    for dir_node in &mut dirs {
+        let dir_path = PathBuf::from(&dir_node.path);
+        dir_node.children = Some(read_dir_recursive(&dir_path, ignored_dirs, ignored_files));
+    }
+
+    let mut result = Vec::with_capacity(dirs.len() + files.len());
+    result.extend(dirs);
+    result.extend(files);
+    result
+}
+
+#[tauri::command]
+pub fn read_dir_tree(dir_path: String) -> Result<Vec<FileTreeNode>, String> {
+    let dir = PathBuf::from(&dir_path);
+    if !dir.is_dir() {
+        return Err(format!("目录不存在: {}", dir_path));
+    }
+
+    let ignored_dirs: HashSet<&str> = IGNORED_DIRS.iter().copied().collect();
+    let ignored_files: HashSet<&str> = IGNORED_FILES.iter().copied().collect();
+
+    Ok(read_dir_recursive(&dir, &ignored_dirs, &ignored_files))
 }
