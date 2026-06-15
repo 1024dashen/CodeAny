@@ -36,7 +36,7 @@
             class="app-settings-btn"
             :class="{ active: chatStore.showAppConfigPanel }"
             :title="t('appConfig.title')"
-            @click="chatStore.toggleAppConfigPanel()"
+            @click="handleAppConfigToggle"
           >
             {{ t('appConfig.settingsShort') }}
           </button>
@@ -153,6 +153,13 @@ const projectFolderTitle = computed(() => {
   if (!activeProjectDir.value) return '';
   return `${activeProjectDir.value}`;
 });
+
+function handleAppConfigToggle() {
+  if (!chatStore.showAppConfigPanel && workspaceStore.selectedFilePath) {
+    workspaceStore.clearSelectedFile();
+  }
+  chatStore.toggleAppConfigPanel();
+}
 
 async function openProjectFolder() {
   const dir = activeProjectDir.value;
