@@ -3,7 +3,7 @@
     <div
       class="tree-row"
       :style="{ paddingLeft: `${depth * 14 + 6}px` }"
-      :class="{ 'selected': !node.isDir && workspaceStore.selectedFilePath === node.path }"
+      :class="{ 'selected': !node.isDir && workspaceStore.activeTabPath === node.path }"
       @click="handleClick"
     >
       <span v-if="node.isDir" class="tree-chevron" :class="{ expanded }">▶</span>

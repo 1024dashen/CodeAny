@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { loadWorkspaceRoot, saveWorkspaceRoot } from '@/utils/store';
@@ -12,6 +12,12 @@ export interface FileTreeNode {
   children?: FileTreeNode[];
 }
 
+export interface OpenFileTab {
+  path: string;
+  content: string;
+  loading: boolean;
+}
+
 export const useWorkspaceStore = defineStore('workspace', () => {
   const workspaceRoot = ref('');
   const isReady = ref(false);
@@ -19,9 +25,14 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   const fileTree = ref<FileTreeNode[]>([]);
   const fileTreeRoot = ref('');
   const fileTreeLoading = ref(false);
-  const selectedFilePath = ref('');
-  const selectedFileContent = ref('');
-  const selectedFileLoading = ref(false);
+  const openTabs = ref<OpenFileTab[]>([]);
+  const activeTabPath = ref('');
+
+  // 向后兼容的计算属性
+  const selectedFilePath = computed(() => activeTabPath.value);
+  const selectedFileContent = computed(() => openTabs.value.find(t => t.path === activeTabPath.value)?.content ?? '');
+  const selectedFileLoading = computed(() => openTabs.value.find(t => t.path === activeTabPath.value)?.loading ?? false);
+  const hasOpenTabs = computed(() => openTabs.value.length > 0);
 
   async function hydrate() {
     workspaceRoot.value = await loadWorkspaceRoot();
@@ -95,8 +106,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   function clearFileTree() {
     fileTree.value = [];
     fileTreeRoot.value = '';
-    selectedFilePath.value = '';
-    selectedFileContent.value = '';
+    openTabs.value = [];
+    activeTabPath.value = '';
   }
 
   async function refreshFileTree(): Promise<void> {
@@ -107,29 +118,54 @@ export const useWorkspaceStore = defineStore('workspace', () => {
 
   async function selectFile(filePath: string): Promise<void> {
     if (!isTauri()) return;
-    selectedFilePath.value = filePath;
-    selectedFileLoading.value = true;
-    selectedFileContent.value = '';
+    // 已打开则切换到该 tab
+    const existing = openTabs.value.find(t => t.path === filePath);
+    if (existing) {
+      activeTabPath.value = filePath;
+      return;
+    }
+    // 新增 tab
+    const tab: OpenFileTab = { path: filePath, content: '', loading: true };
+    openTabs.value.push(tab);
+    activeTabPath.value = filePath;
     try {
-      selectedFileContent.value = await invoke<string>('read_file_content', { filePath });
+      tab.content = await invoke<string>('read_file_content', { filePath });
     } catch (err) {
-      selectedFileContent.value = `// 无法读取文件: ${err instanceof Error ? err.message : String(err)}`;
+      tab.content = `// 无法读取文件: ${err instanceof Error ? err.message : String(err)}`;
     } finally {
-      selectedFileLoading.value = false;
+      tab.loading = false;
+    }
+  }
+
+  function switchTab(filePath: string) {
+    if (openTabs.value.some(t => t.path === filePath)) {
+      activeTabPath.value = filePath;
+    }
+  }
+
+  function closeTab(filePath: string) {
+    const idx = openTabs.value.findIndex(t => t.path === filePath);
+    if (idx < 0) return;
+    openTabs.value.splice(idx, 1);
+    // 如果关闭的是当前活跃 tab，切换到相邻 tab
+    if (activeTabPath.value === filePath) {
+      const next = openTabs.value[Math.min(idx, openTabs.value.length - 1)];
+      activeTabPath.value = next?.path ?? '';
     }
   }
 
   async function saveFile(filePath: string, content: string): Promise<void> {
     if (!isTauri()) return;
     await invoke('write_file_content', { filePath, content });
-    if (selectedFilePath.value === filePath) {
-      selectedFileContent.value = content;
+    const tab = openTabs.value.find(t => t.path === filePath);
+    if (tab) {
+      tab.content = content;
     }
   }
 
   function clearSelectedFile() {
-    selectedFilePath.value = '';
-    selectedFileContent.value = '';
+    openTabs.value = [];
+    activeTabPath.value = '';
   }
 
   return {
@@ -139,9 +175,12 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     fileTree,
     fileTreeRoot,
     fileTreeLoading,
+    openTabs,
+    activeTabPath,
     selectedFilePath,
     selectedFileContent,
     selectedFileLoading,
+    hasOpenTabs,
     hydrate,
     pickWorkspaceRoot,
     ensureWorkspaceRoot,
@@ -150,6 +189,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     clearFileTree,
     refreshFileTree,
     selectFile,
+    switchTab,
+    closeTab,
     clearSelectedFile,
     saveFile,
   };

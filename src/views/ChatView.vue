@@ -62,13 +62,9 @@
         </div>
       </div>
 
-      <!-- 文件查看器模式（文件树中选中文件时） -->
+      <!-- 文件编辑器模式（多 tab） -->
       <FileEditor
-        v-if="workspaceStore.selectedFilePath"
-        :file-path="workspaceStore.selectedFilePath"
-        :content="workspaceStore.selectedFileContent"
-        :loading="workspaceStore.selectedFileLoading"
-        @close="workspaceStore.clearSelectedFile()"
+        v-if="workspaceStore.hasOpenTabs"
       />
 
       <!-- 正常聊天模式 -->

@@ -2,15 +2,23 @@
   <div class="file-editor-wrap">
     <!-- 标签栏 -->
     <div class="file-editor-tabs">
-      <div class="file-tab active">
-        <span class="file-tab-icon">{{ fileIcon }}</span>
-        <span class="file-tab-name" :class="{ modified: isModified }">{{ fileName }}</span>
-        <span v-if="isModified" class="modified-dot" title="未保存">●</span>
-        <button class="file-tab-close" @click="$emit('close')" title="关闭">✕</button>
+      <div class="tabs-scroll">
+        <div
+          v-for="tab in workspaceStore.openTabs"
+          :key="tab.path"
+          class="file-tab"
+          :class="{ active: tab.path === workspaceStore.activeTabPath }"
+          @click="workspaceStore.switchTab(tab.path)"
+        >
+          <span class="file-tab-icon">{{ getFileIcon(tab.path) }}</span>
+          <span class="file-tab-name" :class="{ modified: modifiedTabs.has(tab.path) }">{{ getFileName(tab.path) }}</span>
+          <span v-if="modifiedTabs.has(tab.path)" class="modified-dot" title="未保存">●</span>
+          <button class="file-tab-close" @click.stop="handleCloseTab(tab.path)" title="关闭">✕</button>
+        </div>
       </div>
       <div class="tab-actions">
         <button
-          v-if="isModified"
+          v-if="currentTabModified"
           class="save-btn"
           @click="saveFile"
           :disabled="saving"
@@ -24,7 +32,7 @@
 
     <!-- 编辑器容器 -->
     <div class="file-editor-body">
-      <div v-if="loading" class="editor-loading">加载中...</div>
+      <div v-if="workspaceStore.selectedFileLoading" class="editor-loading">加载中...</div>
       <div v-else ref="editorContainer" class="editor-container"></div>
     </div>
   </div>
@@ -48,41 +56,31 @@ import { rust } from '@codemirror/lang-rust';
 import { python } from '@codemirror/lang-python';
 import { vue } from '@codemirror/lang-vue';
 
-const props = defineProps<{
-  filePath: string;
-  content: string;
-  loading: boolean;
-}>();
-
-const emit = defineEmits<{
-  close: [];
-}>();
-
 const workspaceStore = useWorkspaceStore();
 const settingsStore = useSettingsStore();
 
 const editorContainer = ref<HTMLDivElement | null>(null);
-const isModified = ref(false);
 const saving = ref(false);
 const saveMsg = ref('');
 const saveMsgType = ref<'success' | 'error'>('success');
 
+// 每个 tab 的修改状态
+const modifiedTabs = ref(new Set<string>());
+
 let editorView: EditorView | null = null;
 let saveMsgTimer: ReturnType<typeof setTimeout> | null = null;
 
-const fileName = computed(() => {
-  const p = props.filePath.replace(/\\/g, '/');
+// 缓存每个 tab 的编辑器内容（未保存的修改）
+const tabContentCache = new Map<string, string>();
+
+function getFileName(filePath: string): string {
+  const p = filePath.replace(/\\/g, '/');
   return p.split('/').pop() ?? p;
-});
+}
 
-const fileExt = computed(() => {
-  const name = fileName.value.toLowerCase();
-  return name.includes('.') ? name.split('.').pop()! : '';
-});
-
-const fileIcon = computed(() => {
-  const name = fileName.value.toLowerCase();
-  const ext = fileExt.value;
+function getFileIcon(filePath: string): string {
+  const name = getFileName(filePath).toLowerCase();
+  const ext = name.includes('.') ? name.split('.').pop()! : '';
   const iconMap: Record<string, string> = {
     html: '🌐', htm: '🌐',
     css: '🎨', scss: '🎨', less: '🎨',
@@ -96,10 +94,15 @@ const fileIcon = computed(() => {
   if (name === 'dockerfile') return '🐳';
   if (name === '.gitignore') return '🙈';
   return iconMap[ext] || '📄';
-});
+}
+
+function getFileExt(): string {
+  const name = getFileName(workspaceStore.activeTabPath).toLowerCase();
+  return name.includes('.') ? name.split('.').pop()! : '';
+}
 
 function getLanguageExtension() {
-  const ext = fileExt.value;
+  const ext = getFileExt();
   switch (ext) {
     case 'js': case 'jsx': return javascript({ jsx: true });
     case 'ts': case 'tsx': return javascript({ typescript: true, jsx: ext === 'tsx' });
@@ -140,7 +143,9 @@ function buildExtensions() {
     ]),
     EditorView.updateListener.of((update) => {
       if (update.docChanged) {
-        isModified.value = true;
+        modifiedTabs.value.add(workspaceStore.activeTabPath);
+        // 触发响应式更新
+        modifiedTabs.value = new Set(modifiedTabs.value);
       }
     }),
     EditorView.theme({
@@ -168,18 +173,19 @@ function initEditor(content: string) {
     state,
     parent: editorContainer.value,
   });
-
-  isModified.value = false;
 }
 
 async function saveFile() {
   if (!editorView || saving.value) return;
+  const filePath = workspaceStore.activeTabPath;
   const content = editorView.state.doc.toString();
   saving.value = true;
   if (saveMsgTimer) clearTimeout(saveMsgTimer);
   try {
-    await workspaceStore.saveFile(props.filePath, content);
-    isModified.value = false;
+    await workspaceStore.saveFile(filePath, content);
+    modifiedTabs.value.delete(filePath);
+    modifiedTabs.value = new Set(modifiedTabs.value);
+    tabContentCache.delete(filePath);
     saveMsg.value = '✓ 已保存';
     saveMsgType.value = 'success';
   } catch (err) {
@@ -191,21 +197,49 @@ async function saveFile() {
   }
 }
 
-// 当 content 或 filePath 变化时重建编辑器
+function handleCloseTab(filePath: string) {
+  // 保存当前编辑器内容到缓存
+  if (editorView && filePath === workspaceStore.activeTabPath) {
+    tabContentCache.set(filePath, editorView.state.doc.toString());
+  }
+  workspaceStore.closeTab(filePath);
+}
+
+// 当前 tab 是否有未保存修改
+const currentTabModified = computed(() => modifiedTabs.value.has(workspaceStore.activeTabPath));
+
+// 当活跃 tab 变化时，保存旧 tab 内容并加载新 tab 内容
 watch(
-  () => props.loading,
-  async (loading: boolean) => {
-    if (loading) return;
-    await nextTick();
-    initEditor(props.content);
+  () => workspaceStore.activeTabPath,
+  async (newPath, oldPath) => {
+    // 保存旧 tab 的编辑器内容
+    if (oldPath && editorView) {
+      tabContentCache.set(oldPath, editorView.state.doc.toString());
+    }
+    // 加载新 tab 内容
+    if (newPath) {
+      await nextTick();
+      const tab = workspaceStore.openTabs.find(t => t.path === newPath);
+      if (tab && !tab.loading) {
+        const content = tabContentCache.has(newPath) ? tabContentCache.get(newPath)! : tab.content;
+        initEditor(content);
+      }
+    }
   },
 );
 
+// 当新 tab 内容加载完成时，初始化编辑器
 watch(
-  () => props.filePath,
-  async () => {
-    await nextTick();
-    if (!props.loading) initEditor(props.content);
+  () => workspaceStore.selectedFileLoading,
+  async (loading) => {
+    if (loading || !workspaceStore.activeTabPath) return;
+    // 仅在编辑器未初始化时（新打开的 tab 内容刚加载完）
+    const tab = workspaceStore.openTabs.find(t => t.path === workspaceStore.activeTabPath);
+    if (tab) {
+      await nextTick();
+      const content = tabContentCache.has(tab.path) ? tabContentCache.get(tab.path)! : tab.content;
+      initEditor(content);
+    }
   },
 );
 
@@ -213,7 +247,7 @@ watch(
 watch(
   () => settingsStore.settings.theme,
   async () => {
-    if (props.loading || !editorView) return;
+    if (workspaceStore.selectedFileLoading || !editorView) return;
     const currentContent = editorView.state.doc.toString();
     await nextTick();
     initEditor(currentContent);
@@ -221,9 +255,10 @@ watch(
 );
 
 onMounted(async () => {
-  if (!props.loading) {
+  const tab = workspaceStore.openTabs.find(t => t.path === workspaceStore.activeTabPath);
+  if (tab && !tab.loading) {
     await nextTick();
-    initEditor(props.content);
+    initEditor(tab.content);
   }
 });
 
@@ -253,22 +288,48 @@ defineExpose({ saveFile });
   align-items: center;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  padding: 0 8px;
   min-height: 36px;
   flex-shrink: 0;
   gap: 0;
+}
+
+.tabs-scroll {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.tabs-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .file-tab {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
+  padding: 6px 10px;
   font-size: 13px;
-  color: var(--text-primary);
-  border-bottom: 2px solid var(--accent);
-  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
   white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.file-tab:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.file-tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+  background: var(--bg-primary);
 }
 
 .file-tab-icon {
@@ -311,7 +372,8 @@ defineExpose({ saveFile });
   align-items: center;
   gap: 8px;
   margin-left: auto;
-  padding-right: 4px;
+  padding: 0 8px;
+  flex-shrink: 0;
 }
 
 .save-btn {
