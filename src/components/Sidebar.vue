@@ -3,7 +3,7 @@
     <!-- 文件树模式 -->
     <template v-if="showFileTree">
       <div class="sidebar-header">
-        <button class="back-chat-btn" @click="closeFileTree" :title="collapsed ? t('fileTree.backToChats') : ''">
+        <button class="sidebar-header-btn" @click="closeFileTree" :title="collapsed ? t('fileTree.backToChats') : ''">
           <span class="icon" aria-hidden="true">←</span>
           <span v-if="!collapsed" class="btn-text">{{ t('fileTree.backToChats') }}</span>
         </button>
@@ -32,7 +32,7 @@
     <!-- 会话列表模式 -->
     <template v-else>
       <div class="sidebar-header">
-        <button class="new-chat-btn" @click="handleNewSession" :title="collapsed ? t('sidebar.newApp') : ''">
+        <button class="sidebar-header-btn" @click="handleNewSession" :title="collapsed ? t('sidebar.newApp') : ''">
           <span class="icon" aria-hidden="true">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
               <path d="M8 3v10M3 8h10" />
@@ -260,11 +260,11 @@ onUnmounted(() => {
   border-bottom: 1px solid var(--border-color);
 }
 
-.new-chat-btn {
+.sidebar-header-btn {
   width: 100%;
   padding: 10px 16px;
-  background: var(--accent);
-  color: white;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
@@ -272,35 +272,37 @@ onUnmounted(() => {
   align-items: center;
   gap: 8px;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.2s;
   overflow: hidden;
   white-space: nowrap;
 }
 
-.collapsed .new-chat-btn {
+.collapsed .sidebar-header-btn {
   padding: 10px 0;
 }
 
-.new-chat-btn:hover {
-  background: var(--accent-hover);
+.sidebar-header-btn:hover {
+  background: var(--accent);
+  color: white;
 }
 
-.new-chat-btn .icon {
+.sidebar-header-btn .icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   width: 16px;
   height: 16px;
+  font-size: 14px;
   line-height: 1;
 }
 
-.new-chat-btn .icon svg {
+.sidebar-header-btn .icon svg {
   width: 14px;
   height: 14px;
 }
 
-.new-chat-btn .btn-text {
+.sidebar-header-btn .btn-text {
   line-height: 1;
 }
 
@@ -590,46 +592,6 @@ onUnmounted(() => {
 }
 
 /* 文件树模式 */
-.back-chat-btn {
-  width: 100%;
-  padding: 10px 16px;
-  background: var(--bg-hover);
-  color: var(--text-secondary);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-  transition: all 0.2s;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.collapsed .back-chat-btn {
-  padding: 10px 0;
-}
-
-.back-chat-btn:hover {
-  background: var(--accent);
-  color: white;
-}
-
-.back-chat-btn .icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  font-size: 14px;
-}
-
-.back-chat-btn .btn-text {
-  line-height: 1;
-}
-
 .file-tree-header {
   display: flex;
   align-items: center;
