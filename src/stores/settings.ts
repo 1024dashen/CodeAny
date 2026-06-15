@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { AppSettings, ModelProvider, ServiceProviderId } from '@/types';
+import type { AppSettings, ModelProvider, ServiceProviderId, SshConfig } from '@/types';
 import { DEFAULT_PROVIDERS } from '@/utils/providers';
 import { defaultServiceTokens } from '@/utils/serviceProviders';
 import { loadStorageValue, saveStorageValue } from '@/utils/store';
@@ -28,6 +28,7 @@ function mergeSettings(saved: AppSettings): AppSettings {
     generationPrompt: saved.generationPrompt ?? '',
     locale: saved.locale ?? DEFAULT_LOCALE,
     serviceTokens: { ...defaultServiceTokens(), ...saved.serviceTokens },
+    sshServers: saved.sshServers ?? [],
     providers: [...mergedProviders, ...customProviders],
   };
 }
@@ -44,6 +45,7 @@ function defaultSettings(): AppSettings {
     systemPrompt: '',
     generationPrompt: '',
     serviceTokens: defaultServiceTokens(),
+    sshServers: [],
   };
 }
 
@@ -184,6 +186,25 @@ export const useSettingsStore = defineStore('settings', () => {
     save();
   }
 
+  function addSshServer(config: SshConfig) {
+    settings.value.sshServers.push(config);
+    save();
+  }
+
+  function updateSshServer(index: number, data: Partial<SshConfig>) {
+    if (index >= 0 && index < settings.value.sshServers.length) {
+      settings.value.sshServers[index] = { ...settings.value.sshServers[index], ...data };
+      save();
+    }
+  }
+
+  function removeSshServer(index: number) {
+    if (index >= 0 && index < settings.value.sshServers.length) {
+      settings.value.sshServers.splice(index, 1);
+      save();
+    }
+  }
+
   return {
     settings,
     isHydrated,
@@ -207,6 +228,9 @@ export const useSettingsStore = defineStore('settings', () => {
     setSendOnEnter,
     setServiceToken,
     clearServiceToken,
+    addSshServer,
+    updateSshServer,
+    removeSshServer,
     save,
   };
 });

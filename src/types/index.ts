@@ -87,13 +87,24 @@ export interface ProjectFile {
 
 export type AppLocale = 'zh-CN' | 'en' | 'ja' | 'ko' | 'zh-TW';
 
-export type ServiceProviderId = 'github' | 'cloudflare' | 'netlify' | 'vercel';
+export type ServiceProviderId = 'github' | 'cloudflare' | 'netlify' | 'vercel' | 'supabase';
 
 export interface ServiceTokens {
   github: string;
   cloudflare: string;
   netlify: string;
   vercel: string;
+  supabase: string;
+}
+
+export interface SshConfig {
+  host: string;
+  port: number;
+  username: string;
+  authType: 'password' | 'key';
+  password: string;
+  privateKey: string;
+  name: string;
 }
 
 export interface AppSettings {
@@ -107,6 +118,7 @@ export interface AppSettings {
   systemPrompt: string;
   generationPrompt: string;
   serviceTokens: ServiceTokens;
+  sshServers: SshConfig[];
 }
 
 export interface User {
