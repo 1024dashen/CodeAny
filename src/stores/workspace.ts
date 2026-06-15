@@ -124,16 +124,16 @@ export const useWorkspaceStore = defineStore('workspace', () => {
       activeTabPath.value = filePath;
       return;
     }
-    // 新增 tab
-    const tab: OpenFileTab = { path: filePath, content: '', loading: true };
-    openTabs.value.push(tab);
+    // 新增 tab（通过响应式代理访问，确保 Vue 检测到变化）
+    openTabs.value.push({ path: filePath, content: '', loading: true });
     activeTabPath.value = filePath;
+    const idx = openTabs.value.length - 1;
     try {
-      tab.content = await invoke<string>('read_file_content', { filePath });
+      openTabs.value[idx].content = await invoke<string>('read_file_content', { filePath });
     } catch (err) {
-      tab.content = `// 无法读取文件: ${err instanceof Error ? err.message : String(err)}`;
+      openTabs.value[idx].content = `// 无法读取文件: ${err instanceof Error ? err.message : String(err)}`;
     } finally {
-      tab.loading = false;
+      openTabs.value[idx].loading = false;
     }
   }
 
