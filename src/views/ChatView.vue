@@ -160,10 +160,10 @@ function handleAppConfigToggle() {
 async function openProjectFolder() {
   const dir = activeProjectDir.value;
   if (!dir) return;
-  // 展开侧边栏并切换到文件树模式
+  // 展开侧边栏并切换文件树模式
   sidebarCollapsed.value = false;
   await nextTick();
-  sidebarRef.value?.openFileTree(dir);
+  sidebarRef.value?.toggleFileTree(dir);
 }
 
 const tips = computed(() => [

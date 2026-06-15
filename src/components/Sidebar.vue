@@ -220,7 +220,15 @@ function closeFileTree() {
   workspaceStore.clearFileTree();
 }
 
-defineExpose({ openFileTree, closeFileTree });
+function toggleFileTree(dirPath: string) {
+  if (showFileTree.value && workspaceStore.fileTreeRoot === dirPath) {
+    closeFileTree();
+  } else {
+    openFileTree(dirPath);
+  }
+}
+
+defineExpose({ openFileTree, closeFileTree, toggleFileTree });
 
 // 点击外部关闭菜单
 function handleClickOutside() {
