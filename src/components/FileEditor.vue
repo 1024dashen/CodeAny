@@ -2,7 +2,7 @@
   <div class="file-editor-wrap">
     <!-- 标签栏 -->
     <div class="file-editor-tabs">
-      <div class="tabs-scroll">
+      <div class="tabs-scroll" ref="tabsScrollRef">
         <div
           v-for="tab in workspaceStore.openTabs"
           :key="tab.path"
@@ -16,6 +16,7 @@
           <button class="file-tab-close" @click.stop="handleCloseTab(tab.path)" title="关闭">✕</button>
         </div>
       </div>
+      <div class="tabs-scroll-fade" aria-hidden="true"></div>
       <div class="tab-actions">
         <button
           v-if="currentTabModified"
@@ -60,6 +61,7 @@ const workspaceStore = useWorkspaceStore();
 const settingsStore = useSettingsStore();
 
 const editorContainer = ref<HTMLDivElement | null>(null);
+const tabsScrollRef = ref<HTMLDivElement | null>(null);
 const saving = ref(false);
 const saveMsg = ref('');
 const saveMsgType = ref<'success' | 'error'>('success');
@@ -225,8 +227,29 @@ watch(
         initEditor(content);
       }
     }
+    // 滚动活跃 tab 到可视区域
+    await nextTick();
+    scrollToActiveTab();
   },
 );
+
+// 滚动活跃 tab 到可视区域
+function scrollToActiveTab() {
+  if (!tabsScrollRef.value || !workspaceStore.activeTabPath) return;
+  const activeEl = tabsScrollRef.value.querySelector('.file-tab.active') as HTMLElement | null;
+  if (!activeEl) return;
+  const container = tabsScrollRef.value;
+  const elLeft = activeEl.offsetLeft;
+  const elRight = elLeft + activeEl.offsetWidth;
+  const containerLeft = container.scrollLeft;
+  const containerRight = containerLeft + container.clientWidth;
+
+  if (elLeft < containerLeft) {
+    container.scrollTo({ left: elLeft - 8, behavior: 'smooth' });
+  } else if (elRight > containerRight) {
+    container.scrollTo({ left: elRight - container.clientWidth + 8, behavior: 'smooth' });
+  }
+}
 
 // 当新 tab 内容加载完成时，初始化编辑器
 watch(
@@ -291,6 +314,8 @@ defineExpose({ saveFile });
   min-height: 36px;
   flex-shrink: 0;
   gap: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .tabs-scroll {
@@ -305,6 +330,18 @@ defineExpose({ saveFile });
 
 .tabs-scroll::-webkit-scrollbar {
   display: none;
+}
+
+/* 右侧渐变遮罩，提示有溢出 tab */
+.tabs-scroll-fade {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 32px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--bg-secondary) 80%);
+  z-index: 1;
 }
 
 .file-tab {
