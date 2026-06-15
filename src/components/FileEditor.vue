@@ -38,7 +38,7 @@ import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLi
 import { EditorState } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { syntaxHighlighting, defaultHighlightStyle, bracketMatching, foldGutter, indentOnInput } from '@codemirror/language';
-import { oneDark } from '@codemirror/theme-one-dark';
+import { atomOneDark } from '@/utils/editorTheme';
 import { javascript } from '@codemirror/lang-javascript';
 import { css } from '@codemirror/lang-css';
 import { html } from '@codemirror/lang-html';
@@ -120,7 +120,6 @@ function isDarkTheme() {
 
 function buildExtensions() {
   const langExt = getLanguageExtension();
-  const themeExt = isDarkTheme() ? oneDark : syntaxHighlighting(defaultHighlightStyle);
   return [
     lineNumbers(),
     highlightActiveLineGutter(),
@@ -130,9 +129,8 @@ function buildExtensions() {
     indentOnInput(),
     bracketMatching(),
     foldGutter(),
-    syntaxHighlighting(defaultHighlightStyle),
+    ...(isDarkTheme() ? atomOneDark : [syntaxHighlighting(defaultHighlightStyle)]),
     ...(Array.isArray(langExt) ? langExt : [langExt]),
-    ...(isDarkTheme() ? [oneDark] : []),
     keymap.of([
       ...defaultKeymap,
       ...historyKeymap,
