@@ -10,7 +10,7 @@
       </div>
 
       <div v-if="!collapsed" class="file-tree-header">
-        <span class="file-tree-root-name" :title="workspaceStore.fileTreeRoot">{{ rootFolderName }}</span>
+        <span class="file-tree-root-name" :title="workspaceStore.fileTreeRoot" @click="openCurrentFolder">{{ rootFolderName }}</span>
         <button class="refresh-btn" @click="workspaceStore.refreshFileTree()" :title="t('fileTree.refresh')">
           ↻
         </button>
@@ -135,6 +135,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import { useChatStore } from '@/stores/chat';
 import { useAuthStore } from '@/stores/auth';
 import { useSettingsStore } from '@/stores/settings';
@@ -225,6 +226,13 @@ function toggleFileTree(dirPath: string) {
     closeFileTree();
   } else {
     openFileTree(dirPath);
+  }
+}
+
+function openCurrentFolder() {
+  const dir = workspaceStore.fileTreeRoot;
+  if (dir && isTauri()) {
+    invoke('open_folder', { path: dir });
   }
 }
 
@@ -618,6 +626,12 @@ onUnmounted(() => {
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.file-tree-root-name:hover {
+  color: var(--accent);
 }
 
 .refresh-btn {
