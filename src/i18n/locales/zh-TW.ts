@@ -245,6 +245,7 @@ export default {
       cloudflare: { desc: '用於 DNS、Pages、Workers 等 Cloudflare API 操作' },
       netlify: { desc: '用於站點部署、網域綁定等 Netlify API 操作' },
       vercel: { desc: '用於專案部署、網域管理等 Vercel API 操作' },
+      supabase: { desc: '用於資料庫、認證、儲存等 Supabase API 操作' },
     },
     ssh: {
       title: 'SSH 伺服器',

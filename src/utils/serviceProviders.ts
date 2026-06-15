@@ -37,6 +37,13 @@ export const SERVICE_PROVIDERS: ServiceProviderMeta[] = [
     placeholder: 'xxxxxxxxxxxx',
     docsUrl: 'https://vercel.com/account/tokens',
   },
+  {
+    id: 'supabase',
+    name: 'Supabase',
+    description: '用于数据库、认证、存储等 Supabase API 操作',
+    placeholder: 'eyJhbGciOiJI...',
+    docsUrl: 'https://supabase.com/dashboard/account/tokens',
+  },
 ];
 
 export function defaultServiceTokens(): ServiceTokens {
@@ -45,6 +52,7 @@ export function defaultServiceTokens(): ServiceTokens {
     cloudflare: '',
     netlify: '',
     vercel: '',
+    supabase: '',
   };
 }
 

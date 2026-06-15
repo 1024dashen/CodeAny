@@ -245,6 +245,7 @@ export default {
       cloudflare: { desc: 'For Cloudflare API: DNS, Pages, Workers, etc.' },
       netlify: { desc: 'For Netlify API: site deployment, domains, etc.' },
       vercel: { desc: 'For Vercel API: project deployment, domains, etc.' },
+      supabase: { desc: 'For Supabase API: database, auth, storage, etc.' },
     },
     ssh: {
       title: 'SSH Servers',
