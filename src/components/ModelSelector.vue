@@ -4,7 +4,9 @@
     <div class="selector-wrapper" @click.stop="toggleProviderMenu">
       <button class="selector-btn provider-btn" :class="{ active: showProviderMenu }">
         <span class="selector-text">{{ activeProviderName }}</span>
-        <span class="selector-arrow" :class="{ open: showProviderMenu }">▾</span>
+        <svg class="selector-arrow" :class="{ open: showProviderMenu }" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
       </button>
       <Transition name="dropdown">
         <div v-if="showProviderMenu" class="selector-dropdown provider-dropdown">
@@ -28,7 +30,9 @@
     <div class="selector-wrapper" @click.stop="toggleModelMenu">
       <button class="selector-btn model-btn" :class="{ active: showModelMenu }">
         <span class="selector-text">{{ activeModelName }}</span>
-        <span class="selector-arrow" :class="{ open: showModelMenu }">▾</span>
+        <svg class="selector-arrow" :class="{ open: showModelMenu }" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
       </button>
       <Transition name="dropdown">
         <div v-if="showModelMenu" class="selector-dropdown model-dropdown">
@@ -159,10 +163,10 @@ onUnmounted(() => {
 }
 
 .selector-arrow {
-  font-size: 10px;
   color: var(--text-muted);
   transition: transform 0.2s;
   flex-shrink: 0;
+  display: inline-block;
 }
 
 .selector-arrow.open {
