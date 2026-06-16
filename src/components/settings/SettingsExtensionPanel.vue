@@ -251,7 +251,7 @@ function toggleSshPassword(index: number) {
 .settings-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .panel-title {

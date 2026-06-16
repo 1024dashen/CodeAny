@@ -156,13 +156,12 @@ function formatDate(ts?: number): string {
 .settings-panel {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 14px;
 }
 
 .panel-title {
   font-size: 20px;
   font-weight: 600;
-  margin-bottom: 4px;
 }
 
 .profile-card {

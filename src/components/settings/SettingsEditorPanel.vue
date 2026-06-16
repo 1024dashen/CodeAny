@@ -88,13 +88,12 @@ const fontSizeOptions = computed<SelectOption[]>(() =>
 .settings-panel {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 14px;
 }
 
 .panel-title {
   font-size: 20px;
   font-weight: 600;
-  margin-bottom: 4px;
 }
 
 .settings-section h4 {

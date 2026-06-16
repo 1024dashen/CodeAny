@@ -170,6 +170,6 @@ watch(
   flex: 1;
   min-width: 0;
   overflow-y: auto;
-  padding: 28px 36px;
+  padding: 18px 26px;
 }
 </style>
