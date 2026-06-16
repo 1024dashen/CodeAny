@@ -263,7 +263,6 @@ function toggleSshPassword(index: number) {
   font-size: 14px;
   color: var(--text-secondary);
   margin-top: -8px;
-  margin-bottom: 8px;
 }
 
 .provider-card {
