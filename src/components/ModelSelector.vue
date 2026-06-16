@@ -125,7 +125,7 @@ onUnmounted(() => {
   padding: 6px 12px;
   border-radius: 8px;
   font-size: 13px;
-  background: var(--bg-input);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   cursor: pointer;
