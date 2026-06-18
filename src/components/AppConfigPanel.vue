@@ -25,6 +25,14 @@
       >
         {{ t('appConfig.mobile') }}
       </button>
+      <button
+        type="button"
+        class="config-tab"
+        :class="{ active: activeTab === 'web' }"
+        @click="activeTab = 'web'"
+      >
+        {{ t('appConfig.web') }}
+      </button>
     </div>
 
     <div v-if="config" class="config-body">
@@ -88,7 +96,7 @@
         </div>
       </section>
 
-      <section v-else key="mobile" class="config-section">
+      <section v-else-if="activeTab === 'mobile'" key="mobile" class="config-section">
         <div class="setting-row">
           <label>{{ t('appConfig.name') }}</label>
           <input v-model="config.mobile.name" type="text" />
@@ -126,28 +134,123 @@
           <NSwitch v-model:value="config.mobile.cameraPermission" />
         </div>
       </section>
+
+      <section v-else-if="activeTab === 'web'" key="web" class="config-section">
+        <div class="setting-row">
+          <label>{{ t('web.domain') }}</label>
+          <input v-model="config.web.domain" type="text" :placeholder="t('web.domainPlaceholder')" />
+        </div>
+        <div class="setting-row">
+          <label>{{ t('web.icon') }}</label>
+          <input v-model="config.web.icon" type="text" :placeholder="t('web.iconPlaceholder')" />
+        </div>
+        <div class="setting-row">
+          <label>{{ t('web.siteTitle') }}</label>
+          <input v-model="config.web.title" type="text" :placeholder="t('web.siteTitlePlaceholder')" />
+        </div>
+        <div class="setting-row">
+          <label>{{ t('web.description') }}</label>
+          <input v-model="config.web.description" type="text" :placeholder="t('web.descriptionPlaceholder')" />
+        </div>
+        <div class="setting-row">
+          <label>{{ t('web.keywords') }}</label>
+          <input v-model="config.web.keywords" type="text" :placeholder="t('web.keywordsPlaceholder')" />
+        </div>
+        <div class="setting-row">
+          <label>{{ t('web.ogImage') }}</label>
+          <input v-model="config.web.ogImage" type="text" :placeholder="t('web.ogImagePlaceholder')" />
+        </div>
+        <div class="setting-row switch-row">
+          <label>{{ t('web.pwaEnabled') }}</label>
+          <NSwitch v-model:value="config.web.pwa.enabled" />
+        </div>
+        <template v-if="config.web.pwa.enabled">
+          <div class="setting-row">
+            <label>{{ t('web.shortName') }}</label>
+            <input v-model="config.web.pwa.shortName" type="text" :placeholder="t('web.shortNamePlaceholder')" />
+          </div>
+          <div class="setting-row">
+            <label>{{ t('web.themeColor') }}</label>
+            <input v-model="config.web.pwa.themeColor" type="text" :placeholder="t('web.themeColorPlaceholder')" />
+          </div>
+          <div class="setting-row">
+            <label>{{ t('web.backgroundColor') }}</label>
+            <input v-model="config.web.pwa.backgroundColor" type="text" :placeholder="t('web.backgroundColorPlaceholder')" />
+          </div>
+          <div class="setting-row">
+            <label>{{ t('web.display') }}</label>
+            <NSelect
+              class="setting-select"
+              v-model:value="config.web.pwa.display"
+              :options="displayOptions"
+            />
+          </div>
+          <div class="setting-row">
+            <label>{{ t('web.orientation') }}</label>
+            <NSelect
+              class="setting-select"
+              v-model:value="config.web.pwa.orientation"
+              :options="orientationOptions"
+            />
+          </div>
+        </template>
+      </section>
       </Transition>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { NSwitch } from 'naive-ui';
+import { NSwitch, NSelect, type SelectOption } from 'naive-ui';
 import { useChatStore } from '@/stores/chat';
 import type { GeneratedAppConfig } from '@/types';
 
 const { t } = useI18n();
 const chatStore = useChatStore();
-const activeTab = ref<'desktop' | 'mobile'>('desktop');
+const activeTab = ref<'desktop' | 'mobile' | 'web'>('desktop');
 const config = ref<GeneratedAppConfig | null>(null);
+
+const displayOptions = computed<SelectOption[]>(() => [
+  { label: t('web.displayStandalone'), value: 'standalone' },
+  { label: t('web.displayFullscreen'), value: 'fullscreen' },
+  { label: t('web.displayMinimalUi'), value: 'minimal-ui' },
+  { label: t('web.displayBrowser'), value: 'browser' },
+]);
+
+const orientationOptions = computed<SelectOption[]>(() => [
+  { label: t('web.orientationAny'), value: 'any' },
+  { label: t('web.orientationNatural'), value: 'natural' },
+  { label: t('web.orientationLandscape'), value: 'landscape' },
+  { label: t('web.orientationPortrait'), value: 'portrait' },
+]);
 
 watch(
   () => chatStore.getActiveAppConfig(),
   (value) => {
     if (value) {
-      config.value = structuredClone(value);
+      const cloned = structuredClone(value);
+      // Ensure web config exists with default values
+      if (!cloned.web) {
+        cloned.web = {
+          domain: '',
+          icon: '',
+          title: '',
+          description: '',
+          keywords: '',
+          ogImage: '',
+          pwa: {
+            enabled: false,
+            shortName: '',
+            themeColor: '#1976d2',
+            backgroundColor: '#ffffff',
+            display: 'standalone',
+            orientation: 'any',
+          },
+        };
+      }
+      config.value = cloned;
     } else {
       config.value = null;
     }
@@ -201,7 +304,7 @@ watch(
 .config-tabs {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 4px;
   padding: 4px;
   margin-bottom: 10px;
@@ -215,7 +318,7 @@ watch(
   top: 4px;
   bottom: 4px;
   left: 4px;
-  width: calc((100% - 8px - 4px) / 2);
+  width: calc((100% - 8px - 8px) / 3);
   border-radius: 6px;
   background: var(--accent);
   box-shadow: 0 1px 3px color-mix(in srgb, var(--accent) 35%, transparent);
@@ -224,7 +327,11 @@ watch(
 }
 
 .config-tabs[data-active='mobile'] .config-tab-indicator {
-  left: calc(4px + (100% - 8px - 4px) / 2 + 4px);
+  left: calc(4px + (100% - 8px - 8px) / 3 + 4px);
+}
+
+.config-tabs[data-active='web'] .config-tab-indicator {
+  left: calc(4px + ((100% - 8px - 8px) / 3) * 2 + 8px);
 }
 
 .config-tab {
@@ -284,14 +391,21 @@ watch(
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 14px;
-  background: var(--bg-input);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   outline: none;
+  transition: all 0.15s;
 }
 
-.setting-row input:focus {
+.setting-row input[type='text']:focus,
+.setting-row input[type='number']:focus {
   border-color: var(--accent);
+  background: var(--bg-input);
+}
+
+.setting-select {
+  flex: 1;
 }
 
 .size-inputs {

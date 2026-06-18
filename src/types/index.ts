@@ -51,9 +51,29 @@ export interface MobileAppConfig {
   cameraPermission: boolean;
 }
 
+export interface PwaConfig {
+  enabled: boolean;
+  shortName: string;
+  themeColor: string;
+  backgroundColor: string;
+  display: 'standalone' | 'fullscreen' | 'minimal-ui' | 'browser';
+  orientation: 'any' | 'natural' | 'landscape' | 'portrait' | 'portrait-primary' | 'portrait-secondary' | 'landscape-primary' | 'landscape-secondary';
+}
+
+export interface WebAppConfig {
+  domain: string;
+  icon: string;
+  title: string;
+  description: string;
+  keywords: string;
+  ogImage: string;
+  pwa: PwaConfig;
+}
+
 export interface GeneratedAppConfig {
   desktop: DesktopAppConfig;
   mobile: MobileAppConfig;
+  web: WebAppConfig;
 }
 
 export interface ChatSession {
