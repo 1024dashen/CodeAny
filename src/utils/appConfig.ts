@@ -1,4 +1,4 @@
-import type { ChatSession, DesktopAppConfig, GeneratedAppConfig, MobileAppConfig } from '@/types';
+import type { ChatSession, DesktopAppConfig, GeneratedAppConfig, MobileAppConfig, WebAppConfig, PwaConfig } from '@/types';
 import { getSessionIcon } from '@/utils/sessionIcon';
 
 export function defaultDesktopAppConfig(session: ChatSession): DesktopAppConfig {
@@ -34,10 +34,34 @@ export function defaultMobileAppConfig(session: ChatSession): MobileAppConfig {
   };
 }
 
+export function defaultPwaConfig(): PwaConfig {
+  return {
+    enabled: false,
+    shortName: '',
+    themeColor: '#1976d2',
+    backgroundColor: '#ffffff',
+    display: 'standalone',
+    orientation: 'any',
+  };
+}
+
+export function defaultWebAppConfig(session: ChatSession): WebAppConfig {
+  return {
+    domain: '',
+    icon: '',
+    title: session.title,
+    description: '',
+    keywords: '',
+    ogImage: '',
+    pwa: defaultPwaConfig(),
+  };
+}
+
 export function defaultGeneratedAppConfig(session: ChatSession): GeneratedAppConfig {
   return {
     desktop: defaultDesktopAppConfig(session),
     mobile: defaultMobileAppConfig(session),
+    web: defaultWebAppConfig(session),
   };
 }
 
@@ -49,5 +73,6 @@ export function ensureAppConfig(session: ChatSession): GeneratedAppConfig {
   return {
     desktop: { ...defaults.desktop, ...session.appConfig.desktop },
     mobile: { ...defaults.mobile, ...session.appConfig.mobile },
+    web: session.appConfig.web ? { ...defaults.web, ...session.appConfig.web } : defaults.web,
   };
 }
