@@ -7,9 +7,13 @@
           <button
             class="collapse-btn"
             @click="sidebarCollapsed = !sidebarCollapsed"
-            :title="sidebarCollapsed ? t('chat.expandSidebar') : t('chat.collapseSidebar')"
+            :title="
+              sidebarCollapsed
+                ? t('chat.expandSidebar')
+                : t('chat.collapseSidebar')
+            "
           >
-            {{ sidebarCollapsed ? '☰' : '◁' }}
+            {{ sidebarCollapsed ? "☰" : "◁" }}
           </button>
           <ModelSelector />
           <button
@@ -28,7 +32,7 @@
             @click="workspaceStore.pickWorkspaceRoot()"
             :title="t('chat.changeWorkspace')"
           >
-            {{ t('chat.workspace') }}
+            {{ t("chat.workspace") }}
           </button>
           <button
             v-if="chatStore.canPreview"
@@ -38,7 +42,7 @@
             :title="t('appConfig.title')"
             @click="handleAppConfigToggle"
           >
-            {{ t('appConfig.settingsShort') }}
+            {{ t("appConfig.settingsShort") }}
           </button>
           <PreviewSelector v-if="chatStore.canPreview" />
           <button
@@ -48,7 +52,7 @@
             :title="t('publish.title')"
             @click="showPublishDialog = true"
           >
-            {{ t('publish.button') }}
+            {{ t("publish.button") }}
           </button>
           <PublishDialog v-model:show="showPublishDialog" />
           <!-- <button
@@ -63,20 +67,31 @@
       </div>
 
       <!-- 文件编辑器模式（多 tab） -->
-      <FileEditor
-        v-if="workspaceStore.hasOpenTabs"
-      />
+      <FileEditor v-if="workspaceStore.hasOpenTabs" />
 
       <!-- 正常聊天模式 -->
       <div v-else ref="messagesRef" class="chat-messages">
-        <AppConfigPanel v-if="chatStore.showAppConfigPanel && chatStore.canPreview" />
+        <AppConfigPanel
+          v-if="chatStore.showAppConfigPanel && chatStore.canPreview"
+        />
         <template v-else>
-          <div v-if="!chatStore.activeSession || chatStore.activeSession.messages.length === 0" class="empty-state">
+          <div
+            v-if="
+              !chatStore.activeSession ||
+              chatStore.activeSession.messages.length === 0
+            "
+            class="empty-state"
+          >
             <div class="empty-icon">🎨</div>
             <h2>CodeAny</h2>
-            <p>{{ t('chat.emptyDesc') }}</p>
+            <p>{{ t("chat.emptyDesc") }}</p>
             <div class="quick-tips">
-              <div class="tip" v-for="tip in tips" :key="tip" @click="quickSend(tip)">
+              <div
+                class="tip"
+                v-for="tip in tips"
+                :key="tip"
+                @click="quickSend(tip)"
+              >
                 {{ tip }}
               </div>
             </div>
@@ -95,13 +110,13 @@
       </div>
 
       <div v-if="chatStore.isPlanRevisionMode" class="input-hint">
-        {{ t('chat.planRevisionHint') }}
+        {{ t("chat.planRevisionHint") }}
       </div>
       <div
         v-else-if="!chatStore.canSendMessage && chatStore.activeSession"
         class="input-hint"
       >
-        {{ t('chat.waitGenerating') }}
+        {{ t("chat.waitGenerating") }}
       </div>
       <ChatInput v-if="!chatStore.showAppConfigPanel" />
     </div>
@@ -110,21 +125,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useChatStore } from '@/stores/chat';
-import { useWorkspaceStore } from '@/stores/workspace';
-import type { ChatMessage } from '@/types';
-import { isValidPlanContent } from '@/utils/codeParser';
-import Sidebar from '@/components/Sidebar.vue';
-import ModelSelector from '@/components/ModelSelector.vue';
-import PreviewSelector from '@/components/PreviewSelector.vue';
-import PublishDialog from '@/components/PublishDialog.vue';
-import AppConfigPanel from '@/components/AppConfigPanel.vue';
-import MessageBubble from '@/components/MessageBubble.vue';
-import ChatInput from '@/components/ChatInput.vue';
-import WorkspaceSetup from '@/components/WorkspaceSetup.vue';
-import FileEditor from '@/components/FileEditor.vue';
+import { ref, computed, watch, nextTick } from "vue";
+import { useI18n } from "vue-i18n";
+import { useChatStore } from "@/stores/chat";
+import { useWorkspaceStore } from "@/stores/workspace";
+import type { ChatMessage } from "@/types";
+import { isValidPlanContent } from "@/utils/codeParser";
+import Sidebar from "@/components/Sidebar.vue";
+import ModelSelector from "@/components/ModelSelector.vue";
+import PreviewSelector from "@/components/PreviewSelector.vue";
+import PublishDialog from "@/components/PublishDialog.vue";
+import AppConfigPanel from "@/components/AppConfigPanel.vue";
+import MessageBubble from "@/components/MessageBubble.vue";
+import ChatInput from "@/components/ChatInput.vue";
+import WorkspaceSetup from "@/components/WorkspaceSetup.vue";
+import FileEditor from "@/components/FileEditor.vue";
 
 const { t } = useI18n();
 const chatStore = useChatStore();
@@ -134,19 +149,23 @@ const sidebarRef = ref<InstanceType<typeof Sidebar> | null>(null);
 const sidebarCollapsed = ref(false);
 const showPublishDialog = ref(false);
 
-const activeProjectDir = computed(() => chatStore.activeSession?.projectDir ?? '');
+const activeProjectDir = computed(
+  () => chatStore.activeSession?.projectDir ?? "",
+);
 
 const projectFolderName = computed(() => {
   const dir = activeProjectDir.value;
-  if (!dir) return '';
-  const normalized = dir.replace(/\\/g, '/');
-  return normalized.split('/').filter(Boolean).pop() ?? dir;
+  if (!dir) return "";
+  const normalized = dir.replace(/\\/g, "/");
+  return normalized.split("/").filter(Boolean).pop() ?? dir;
 });
 
-const shortProjectFolderName = computed(() => projectFolderName.value.slice(0, 6));
+const shortProjectFolderName = computed(() =>
+  projectFolderName.value.slice(0, 6),
+);
 
 const projectFolderTitle = computed(() => {
-  if (!activeProjectDir.value) return '';
+  if (!activeProjectDir.value) return "";
   return `${activeProjectDir.value}`;
 });
 
@@ -167,29 +186,30 @@ async function openProjectFolder() {
 }
 
 const tips = computed(() => [
-  t('chat.tips.todo'),
-  t('chat.tips.calculator'),
-  t('chat.tips.portfolio'),
-  t('chat.tips.weather'),
+  t("chat.tips.todo"),
+  t("chat.tips.calculator"),
+  t("chat.tips.portfolio"),
+  t("chat.tips.weather"),
 ]);
 
 function shouldShowPlanCard(msg: ChatMessage, index: number): boolean {
   const session = chatStore.activeSession;
-  if (!session || msg.role !== 'assistant') return false;
-  if (session.generationPhase !== 'plan_ready') return false;
-  if (!session.planContent || !isValidPlanContent(session.planContent)) return false;
+  if (!session || msg.role !== "assistant") return false;
+  if (session.generationPhase !== "plan_ready") return false;
+  if (!session.planContent || !isValidPlanContent(session.planContent))
+    return false;
   const messages = session.messages;
   const lastAssistantIndex = [...messages]
     .map((m, i) => ({ m, i }))
-    .filter(({ m }) => m.role === 'assistant' && !m.isLoading)
+    .filter(({ m }) => m.role === "assistant" && !m.isLoading)
     .pop()?.i;
   return index === lastAssistantIndex;
 }
 
 function shouldShowProjectFiles(msg: ChatMessage, index: number): boolean {
   const session = chatStore.activeSession;
-  if (!session || msg.role !== 'assistant') return false;
-  if (session.generationPhase !== 'done') return false;
+  if (!session || msg.role !== "assistant") return false;
+  if (session.generationPhase !== "done") return false;
   const messages = session.messages;
   const lastAssistantIndex = messages.length - 1;
   return index === lastAssistantIndex && !!session.projectFiles?.length;
@@ -214,7 +234,10 @@ watch(
 );
 
 watch(
-  () => chatStore.activeSession?.messages?.[chatStore.activeSession!.messages.length - 1]?.content,
+  () =>
+    chatStore.activeSession?.messages?.[
+      chatStore.activeSession!.messages.length - 1
+    ]?.content,
   () => scrollToBottom(),
 );
 </script>
