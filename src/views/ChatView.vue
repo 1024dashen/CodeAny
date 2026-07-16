@@ -103,7 +103,7 @@
       >
         {{ t('chat.waitGenerating') }}
       </div>
-      <ChatInput />
+      <ChatInput v-if="!chatStore.showAppConfigPanel" />
     </div>
     <WorkspaceSetup />
   </div>
